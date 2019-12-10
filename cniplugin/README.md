@@ -74,6 +74,7 @@ for now, plugin does not requires any authentication data to access Mizar-MP.
   "cniVersion": "0.3.1",
   "name": "mizarmp-default",
   "type": "mizarmp",
+  "mpurl": "http://127.0.0.1", //for onebox
   "subnet": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
   "project": "3dda2801-d675-4688-a63f-dcda8d327f50"
 ```
