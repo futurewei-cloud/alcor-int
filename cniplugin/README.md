@@ -1,0 +1,81 @@
+# CNI plugin
+This cni plugin works for canonical Kubernetes. It interacts with Mizar-MP controller to provision network resource for pod.
+
+Current implementation supports single Project/VPC/subnet Mizar networking environment only, for now. Multiple VPC/subnet support will be considered in the future. 
+
+## Prerequisites
+The default Project/VPC/subnet have been created, as part of setup process.
+| desc | uuid |
+| --- | --- | 
+| default project | 3dda2801-d675-4688-a63f-dcda8d327f50 |
+| default VPC | 9192a4d4-ffff-4ece-b3f0-8d36e3d88038 | 
+| default subnet | a87e0f87-a2d9-44ef-9194-9a62f178594e |
+
+## Create/Delete nic workflows
+It interacts with Mizar-MP controller to create/delete network interface. Mizar-MP has no golang lib yet; so it uses REST calls directly.
+
+### Create NIC
+1. sends create-port request with the target namespace parameter, gets port-id
+* request
+method: POST
+URL: project/default/port
+body
+```json
+{
+  "projectId": "<default-project-uuid>",
+  "id": "<cni-generated-uuid>",
+  "name": "k8s_<port-id>",
+  "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
+  "networkId": "<default-subnet-uuid>",
+  "vethName": "eth0",
+  "namespace": "<cni-created-netns>",
+  "host" : "<hostname>"
+}
+```
+notes: Mizar-MP controller derives the target host from HTTP sender ip address; namespace value is the netns Kubernetes has created for the pod and passed it to CNI plugin, which will pass on the Mizar-MP for the agent to place nic into; host-id is the hostname of kubelet node.  
+* response
+code: 200-OK, if successful
+
+2. polling get-port till the port is in up state.
+* request
+method: GET
+URL: project/default/default/port/<port-id>
+* response
+body
+```json
+{
+  "projectId": "<default-project-uuid>",
+  "id": "<port-id>",
+  ...
+  "status": "<state>", // state could be PENDING, UP, etc
+  ...
+  "macAddress": "<mac-address>",
+  "fixedIps": [
+    {"subnetId": "<default-subnet-uuid>", "ipAddress": "<ip-address>"}
+  ],
+  ... 
+}
+```
+notes:
+nic info like MAC & IP address is returned in the response body;
+only when status is "UP" can the port considered as ready; it may timeout after some predefined period (1 minute in this implementation).  
+
+### Delete NIC
+method: DELETE
+URL: project/default/default/port/<port-id>
+
+## Deployment on node
+* mizar-mp authentication info
+for now, plugin does not requires any authentication data to access Mizar-MP.
+
+* /etc/cni/net.d/mizarmp.conf
+// todo: specify host
+```json
+  "cniVersion": "0.3.1",
+  "name": "mizarmp-default",
+  "type": "mizarmp",
+  "subnet": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
+  "project": "3dda2801-d675-4688-a63f-dcda8d327f50"
+```
+
+* /opt/cni/bin/mizarmp
