@@ -5,6 +5,7 @@ Current implementation supports single Project/VPC/subnet Mizar networking envir
 
 ## Prerequisites
 The default Project/VPC/subnet have been created, as part of setup process.
+
 | desc | uuid |
 | --- | --- | 
 | default project | 3dda2801-d675-4688-a63f-dcda8d327f50 |
