@@ -69,7 +69,7 @@ only when status is "UP" can the port considered as ready; it may timeout after 
 method: DELETE
 URL: project/default/default/port/<port-id>
 
-## Deployment on node
+## Deployment on Dev Onebox node
 * mizar-mp authentication info
 for now, plugin does not requires any authentication data to access Mizar-MP.
 
@@ -81,7 +81,8 @@ for now, plugin does not requires any authentication data to access Mizar-MP.
   "type": "mizarmp",
   "mpurl": "http://127.0.0.1", //for onebox
   "subnet": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
-  "project": "3dda2801-d675-4688-a63f-dcda8d327f50"
+  "project": "3dda2801-d675-4688-a63f-dcda8d327f50",
+  "host": "localhost"
 ```
 
 * /opt/cni/bin/mizarmp
