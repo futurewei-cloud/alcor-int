@@ -13,12 +13,8 @@ import (
 )
 
 func cmdAdd(args *skel.CmdArgs) error {
-
-	// get nic name
 	nic := args.IfName
-	ns := args.Netns
-
-	// generate port id
+	cniNS := args.Netns
 	portId := uuid.New().String()
 
 	// request to create the port
@@ -32,7 +28,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
-	if err := client.Create(portId, nic, ns); err != nil {
+	if err := client.Create(portId, nic, args.ContainerID); err != nil {
 		return err
 	}
 
@@ -55,15 +51,14 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 	}
 
-	// verify nic is in ns
+	// todo: verify nic in ns properly provisioned
+
+	gw, _, err := pkg.GetV4Gateway(nic, cniNS)
 
 	// store port id in persistent storage which survives process exit
-	if err := pkg.Record(portId, args.ContainerID, nic); err != nil {
+	if err := pkg.NewPortIDStore().Record(portId, args.ContainerID, nic); err != nil {
 		return err
 	}
-
-	// collects the needed info - gw???
-	var gw net.IP	//todo: get gw ip from ns
 
 	var r current.Result
 	intf := &current.Interface{Name: nic, Mac: mac, Sandbox: args.ContainerID}
@@ -78,22 +73,21 @@ func cmdAdd(args *skel.CmdArgs) error {
 		IP: ipData,
 		Mask: ipNet.Mask,
 	}
+
 	ipInfo := &current.IPConfig{
 		Version: "4",
 		Interface: &i,
 		Address: ipv4Net,
-		Gateway: gw,
+		Gateway: *gw,
 	}
 
 	r.IPs = append(r.IPs, ipInfo)
 
-	// formatted in version related fashion
 	versionedResult, err := r.GetAsVersion(netConf.CNIVersion)
 	if err != nil {
 		return fmt.Errorf("failed to get versioned result: %v", err)
 	}
 
-	// return as stdin
 	return versionedResult.Print()
 }
 
