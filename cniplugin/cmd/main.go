@@ -12,17 +12,54 @@ import (
 	"time"
 )
 
+const (
+	pollTimeout = time.Second * 60
+	pollInterval = time.Second * 1
+)
+
 func cmdAdd(args *skel.CmdArgs) error {
 	nic := args.IfName
 	cniNS := args.Netns
 	portId := uuid.New().String()
+	store := pkg.NewPortIDStore()
+
+	portCreated := false
+	portIDPersisted := false
+	var err error
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
 		return err
 	}
 
-	mac, ip, err := provisionNIC(args.ContainerID, netConf.MizarMPServiceURL, cniNS, nic, portId)
+	client, err := pkg.New(netConf.MizarMPServiceURL)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err == nil {
+			return	// no error, no roll back.
+		}
+
+		// to recover in case of failure
+
+		if portCreated {
+			if e := client.Delete(portId); e != nil {
+					// todo: log error
+			}
+		}
+
+		if portIDPersisted {
+			if e := store.Delete(args.ContainerID, nic); e != nil {
+				// todo: log error
+			}
+		}
+	}()
+
+
+	mac, ip, err := provisionNIC(client, args.ContainerID, cniNS, nic, portId)
+	portCreated = true
 	if err != nil {
 		return err
 	}
@@ -32,7 +69,9 @@ func cmdAdd(args *skel.CmdArgs) error {
 	gw, _, err := pkg.GetV4Gateway(nic, cniNS)
 
 	// store port id in persistent storage which survives process exit
-	if err := pkg.NewPortIDStore().Record(portId, args.ContainerID, nic); err != nil {
+	err = store.Record(portId, args.ContainerID, nic)
+	portIDPersisted = true
+	if err != nil {
 		return err
 	}
 
@@ -49,18 +88,13 @@ func cmdAdd(args *skel.CmdArgs) error {
 	return versionedResult.Print()
 }
 
-func provisionNIC(sandbox, mpURL, cniNS, nic, portId string) (mac, ip string, err error) {
-	client, err := pkg.New(mpURL)
-	if err != nil {
-		return
-	}
-
+func provisionNIC(client pkg.PortClient, sandbox, cniNS, nic, portId string) (mac, ip string, err error) {
 	if err := client.Create(portId, nic, cniNS); err != nil {
 		return "", "", err
 	}
 
 	// polling till port is up; get mac address & ip address
-	deadline := time.Now().Add(time.Second * 60)
+	deadline := time.Now().Add(pollTimeout)
 	for {
 		info, err := client.Get(portId)
 		if err != nil {
@@ -76,6 +110,8 @@ func provisionNIC(sandbox, mpURL, cniNS, nic, portId string) (mac, ip string, er
 		if time.Now().After(deadline) {
 			return "", "", fmt.Errorf("timed out: port %q not ready", portId)
 		}
+
+		time.Sleep(pollInterval)
 	}
 
 	return "", "", fmt.Errorf("unexpected error, no port info")
