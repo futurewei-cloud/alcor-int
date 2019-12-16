@@ -69,7 +69,7 @@ func (m client) Create(portID, targetNIC, targetNS string) error {
 		return err
 	}
 
-	if resp.StatusCode() != http.StatusOK {
+	if resp.StatusCode() != http.StatusCreated {
 		return fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
 	}
 

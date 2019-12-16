@@ -11,7 +11,7 @@ type netConf struct {
 	MizarMPServiceURL string `json:"mpurl"`
 	ProjectID string `json:"project"`
 	SubnetID string `json:"subnet"`
-	HostID string `json:"host"`
+	HostID string `json:"hostId"`
 }
 
 func loadNetConf(data []byte) (*netConf, error) {
