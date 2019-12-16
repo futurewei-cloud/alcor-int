@@ -112,11 +112,27 @@ func cmdCheck(args *skel.CmdArgs) error {
 }
 
 func cmdDel(args *skel.CmdArgs) error {
-	return errors.New("to impl")
+	store := pkg.NewPortIDStore()
+	portID, err := store.Get(args.ContainerID, args.IfName)
+	if err != nil {
+		return err
+	}
 
-	// retrieve port-id based on ns + nic
-	// request to delete port
-	// if ok, clean up the persistent record of port-id
+	netConf, err := loadNetConf(args.StdinData)
+	if err != nil {
+		return err
+	}
+	client, err := pkg.New(netConf.MizarMPServiceURL)
+	if err != nil {
+		return err
+	}
+
+	if err := client.Delete(portID); err != nil {
+		return err
+	}
+
+	store.Delete(args.ContainerID, args.IfName)
+	return nil
 }
 
 func main() {
