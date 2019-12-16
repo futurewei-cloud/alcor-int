@@ -40,12 +40,12 @@ body
   "networkId": "<default-subnet-uuid>",
   "vethName": "eth0",
   "namespace": "<cni-created-netns>",
-  "host" : "<host-id>"
+  "hostId" : "<host-id>"
 }
 ```
 notes: namespace value is the netns Kubernetes has created for the pod and passed it to CNI plugin, which will pass on the Mizar-MP for the agent to place nic into; host-id is the id of this host registered in mizar-mp. 
 * response
-code: 200-OK, if successful
+code: 201-Created, if successful
 
 2. polling get-port till the port is in up state.
 * request
