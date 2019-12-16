@@ -8,6 +8,7 @@ import (
 	"github.com/containernetworking/cni/pkg/version"
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"time"
 )
@@ -43,16 +44,18 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 
 		// to recover in case of failure
+		log.Errorf("Add op failed: %v", err)
+		log.Warningf("starting applicable recovery process...")
 
 		if portCreated {
 			if e := client.Delete(portId); e != nil {
-					// todo: log error
+				log.Warningf("recovery by port deletion had error: %v", e)
 			}
 		}
 
 		if portIDPersisted {
 			if e := store.Delete(args.ContainerID, nic); e != nil {
-				// todo: log error
+				log.Warningf("recovery by port ID removal from persistent store has error: %v", e)
 			}
 		}
 	}()
@@ -151,23 +154,31 @@ func cmdDel(args *skel.CmdArgs) error {
 	store := pkg.NewPortIDStore()
 	portID, err := store.Get(args.ContainerID, args.IfName)
 	if err != nil {
+		log.Errorf("Del op failed with persistent store retrieval: %v", err)
 		return err
 	}
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
+		log.Errorf("Del op failed with net config file parsing: %v", err)
 		return err
 	}
+
 	client, err := pkg.New(netConf.MizarMPServiceURL)
 	if err != nil {
+		log.Errorf("Del op failed to get Mizar-MP client: %v", err)
 		return err
 	}
 
 	if err := client.Delete(portID); err != nil {
+		log.Errorf("Del op failed to delete port: %v", err)
 		return err
 	}
 
-	store.Delete(args.ContainerID, args.IfName)
+	if e := store.Delete(args.ContainerID, args.IfName); e != nil {
+		log.Warningf("Del op failed to clean up persistent port ID: %v", e)
+	}
+
 	return nil
 }
 
@@ -175,4 +186,3 @@ func main() {
 	supportVersions := version.PluginSupports("0.1.0", "0.2.0", "0.3.0", "0.3.1")
 	skel.PluginMain(cmdAdd, cmdCheck, cmdDel, supportVersions, "mizarmp")
 }
-
