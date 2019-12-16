@@ -23,6 +23,8 @@ The default Project/VPC/subnet have been created, as part of setup process. Foll
 ## Create/Delete nic workflows
 It interacts with Mizar-MP controller to create/delete network interface. Mizar-MP has no golang lib yet; so it uses REST calls directly.
 
+Below is the overall interactions between relevant components: ![Sequence Diagram](mizar-mp-cniplugin-seq.png)
+
 ### Create NIC
 1. sends create-port request with the target namespace parameter, gets port-id
 * request
