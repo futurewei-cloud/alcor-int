@@ -21,12 +21,23 @@ const (
 func cmdAdd(args *skel.CmdArgs) error {
 	nic := args.IfName
 	cniNS := args.Netns
-	portId := uuid.New().String()
-	store := pkg.NewPortIDStore()
 
 	portCreated := false
 	portIDPersisted := false
 	var err error
+
+	store := pkg.NewPortIDStore()
+	portId, e := store.Get(args.ContainerID, nic)
+	if e != nil || portId == "" {
+		portId = uuid.New().String()
+
+		// store port id in persistent storage which survives process exits
+		err = store.Record(portId, args.ContainerID, nic)
+		portIDPersisted = true
+		if err != nil {
+			return err
+		}
+	}
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
@@ -70,14 +81,6 @@ func cmdAdd(args *skel.CmdArgs) error {
 	// todo: verify nic in ns properly provisioned
 
 	gw, _, err := pkg.GetV4Gateway(nic, cniNS)
-
-	// store port id in persistent storage which survives process exit
-	err = store.Record(portId, args.ContainerID, nic)
-	portIDPersisted = true
-	if err != nil {
-		return err
-	}
-
 	r, err := collectResult(args.ContainerID, nic, mac, ip, *gw)
 	if err != nil {
 		return err
