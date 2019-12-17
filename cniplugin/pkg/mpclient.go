@@ -33,9 +33,9 @@ type Port struct {
 
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
-	Create(portID, targetNIC, targetNS string) error
-	Get(subnetID, portID string) (*Port, error)
-	Delete(portID string) error
+	Create(projectID, portID, targetNIC, targetNS string) error
+	Get(prohectID, subnetID, portID string) (*Port, error)
+	Delete(projectID, portID string) error
 }
 
 type client struct {
@@ -56,49 +56,53 @@ func New(mpURL string) (PortClient, error) {
 	}, nil
 }
 
-func (m client) Create(portID, targetNIC, targetNS string) error {
+// todo: may split into 2 REST calls: create port + bind host/ns
+func (m client) Create(projectID, portID, targetNIC, targetNS string) error {
 	body, err := genCreatePortBody(portID, targetNIC, targetNS)
 	if err != nil {
 		return err
 	}
 
-	url := path.Join(m.url.Path, "Port")
+	url := *m.url
+	url.Path = path.Join(url.Path, "project", projectID, "port")
 	client := resty.New().R().SetHeader("Content-Type", "application/json")
-	resp, err := client.SetBody(body).Post(url)
+	resp, err := client.SetBody(body).Post(url.String())
 	if err != nil {
 		return err
 	}
 
 	if resp.StatusCode() != http.StatusCreated {
-		return fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
+		return fmt.Errorf("failed, method=POST, url=%s, status cod=%d, body=%s", m.url.String(), resp.StatusCode(), resp)
 	}
 
 	return nil
 }
 
-func (m client) Get(subnetID, portID string) (*Port, error) {
-	url := path.Join(m.url.Path, "Port", portID)
-	resp, err := resty.New().R().Get(url)
+func (m client) Get(projectID, subnetID, portID string) (*Port, error) {
+	url := *m.url
+	url.Path = path.Join(url.Path, "project", projectID, "port", portID)
+	resp, err := resty.New().R().Get(url.String())
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return nil, fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
+		return nil, fmt.Errorf("failed, method=GT, url=%s, status cod=%d, body=%s", m.url.String(), resp.StatusCode(), resp)
 	}
 
 	return parseGetPortResp(subnetID, resp.Body())
 }
 
-func (m client) Delete(portID string) error {
-	url := path.Join(m.url.Path, "Port", portID)
-	resp, err := resty.New().R().Delete(url)
+func (m client) Delete(projectID, portID string) error {
+	url := *m.url
+	url.Path = path.Join(url.Path, "project", projectID, "port", portID)
+	resp, err := resty.New().R().Delete(url.String())
 	if err != nil {
 		return err
 	}
 
 	if resp.StatusCode() != http.StatusNoContent {
-		return fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
+		return fmt.Errorf("failed, method=DELETE, url=%s, status cod=%d", m.url.String(), resp.StatusCode())
 	}
 
 	return nil
