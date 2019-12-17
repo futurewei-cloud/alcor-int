@@ -83,9 +83,13 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
-	// todo: consider getting gateway ip address from Mizar-MP service directly
-	gw, _, err := pkg.GetV4Gateway(nic, cniNS)
-	r, err := collectResult(args.ContainerID, nic, mac, ip, *gw)
+	subnet, err := client.GetSubnet(netConf.ProjectID, netConf.SubnetID)
+	if err != nil {
+		return err
+	}
+	gw := subnet.Gateway
+
+	r, err := collectResult(args.ContainerID, nic, mac, ip, gw, subnet.Netmask)
 	if err != nil {
 		return err
 	}
@@ -127,19 +131,15 @@ func provisionNIC(client pkg.PortClient, projectID, subnetID, sandbox, cniNS, ni
 	return "", "", fmt.Errorf("unexpected error, no port info")
 }
 
-func collectResult(sandbox, nic, mac, ip string, gw net.IP) (*current.Result, error){
+func collectResult(sandbox, nic, mac, ip string, gw net.IP, netmask net.IPMask) (*current.Result, error){
 	var r current.Result
 	intf := &current.Interface{Name: nic, Mac: mac, Sandbox: sandbox}
 	i := 0
 	r.Interfaces = append(r.Interfaces, intf)
-	ipData, ipNet, err := net.ParseCIDR(ip)
-	if err != nil {
-		return nil, err
-	}
 
 	ipv4Net := net.IPNet{
-		IP:   ipData,
-		Mask: ipNet.Mask,
+		IP:   net.ParseIP(ip),
+		Mask: netmask,
 	}
 
 	ipInfo := &current.IPConfig{
