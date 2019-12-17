@@ -129,8 +129,8 @@ func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	}
 
 	return &Port{
-		Status: PortStatus(*obj["status"]),
-		MAC:    string(*obj["macAddress"]),
+		Status: PortStatus(strings.Trim(string(*obj["status"]), `"`)),
+		MAC:    strings.Trim(string(*obj["macAddress"]), `"`),
 		IP:     ip,
 	}, nil
 }
