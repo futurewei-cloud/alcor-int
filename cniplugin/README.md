@@ -74,6 +74,7 @@ only when status is "UP" can the port considered as ready; it may timeout after 
 ### Delete NIC
 method: DELETE
 URL: project/\<project-id\>/port/\<port-id\>
+Response Code: 204 if successfully deleted
 
 ## Deployment on Dev Onebox node
 * mizar-mp authentication info
