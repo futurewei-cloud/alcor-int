@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -28,7 +29,19 @@ const (
 type Port struct {
 	Status PortStatus
 	MAC    string
-	IP     string
+	IP     string		//not in CIDR format; mere ip address like "10.0.0.4"
+}
+
+//Subnet is the subnet info in Mizar-MP
+type Subnet struct {
+	Gateway net.IP
+	Netmask net.IPMask
+}
+
+// subnet is struct to facilitate json parsing
+type subnet struct {
+	GatewayIP string `json:"gatewayIp"`
+	CIDR string `json:"cidr"`
 }
 
 // PortClient is the interface to request Mizar-MP to work at ports
@@ -36,6 +49,7 @@ type PortClient interface {
 	Create(projectID, portID, targetNIC, targetNS string) error
 	Get(prohectID, subnetID, portID string) (*Port, error)
 	Delete(projectID, portID string) error
+	GetSubnet(prohectID, subnetID string) (*Subnet, error)
 }
 
 type client struct {
@@ -108,6 +122,21 @@ func (m client) Delete(projectID, portID string) error {
 	return nil
 }
 
+func (m client) GetSubnet(projectID, subnetID string) (*Subnet, error) {
+	url := *m.url
+	url.Path = path.Join(url.Path, "project", projectID, "subnet", subnetID)
+	resp, err := resty.New().R().Get(url.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode() != http.StatusOK {
+		return nil, fmt.Errorf("failed, method=GET, url=%s, status cod=%d", m.url.String(), resp.StatusCode())
+	}
+
+	return parseSubnetInfo(resp.Body())
+}
+
 func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	var obj map[string]*json.RawMessage
 	if err := json.Unmarshal(body, &obj); err != nil {
@@ -167,4 +196,19 @@ func genCreatePortBody(portID, targetNIC, targetNS string) (string, error) {
 		hostBaseName)
 
 	return body, nil
+}
+
+func parseSubnetInfo(data []byte) (*Subnet, error) {
+	subnet := &subnet{}
+	if err := json.Unmarshal(data, subnet); err != nil {
+		return nil, err
+	}
+
+	gwip := net.ParseIP(subnet.GatewayIP)
+	_, netmask, err := net.ParseCIDR(subnet.CIDR)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Subnet{Gateway: gwip, Netmask: netmask.Mask}, nil
 }
