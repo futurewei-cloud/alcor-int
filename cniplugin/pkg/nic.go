@@ -39,3 +39,10 @@ func GetV4Gateway(device, nsPath string) (gw *net.IP, priority int, err error) {
 
 	return
 }
+
+func FindNicInNs(device, nsPath string) error {
+	return ns.WithNetNSPath(nsPath, func(nsOrig ns.NetNS) error {
+		_, err := netlink.LinkByName(device)
+		return err
+	})
+}
