@@ -34,7 +34,7 @@ type Port struct {
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
 	Create(portID, targetNIC, targetNS string) error
-	Get(portID string) (*Port, error)
+	Get(subnetID, portID string) (*Port, error)
 	Delete(portID string) error
 }
 
@@ -76,7 +76,7 @@ func (m client) Create(portID, targetNIC, targetNS string) error {
 	return nil
 }
 
-func (m client) Get(portID string) (*Port, error) {
+func (m client) Get(subnetID, portID string) (*Port, error) {
 	url := path.Join(m.url.Path, "Port", portID)
 	resp, err := resty.New().R().Get(url)
 	if err != nil {
@@ -87,7 +87,7 @@ func (m client) Get(portID string) (*Port, error) {
 		return nil, fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
 	}
 
-	return parseGetPortResp(resp.Body())
+	return parseGetPortResp(subnetID, resp.Body())
 }
 
 func (m client) Delete(portID string) error {
@@ -97,14 +97,14 @@ func (m client) Delete(portID string) error {
 		return err
 	}
 
-	if resp.StatusCode() != http.StatusOK {
+	if resp.StatusCode() != http.StatusNoContent {
 		return fmt.Errorf("failed, status cod=%d, body=%s", resp.StatusCode(), resp)
 	}
 
 	return nil
 }
 
-func parseGetPortResp(body []byte) (*Port, error) {
+func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	var obj map[string]*json.RawMessage
 	if err := json.Unmarshal(body, &obj); err != nil {
 		return nil, fmt.Errorf("failed, not json body: %s", string(body))
@@ -115,10 +115,23 @@ func parseGetPortResp(body []byte) (*Port, error) {
 		return nil, fmt.Errorf("failed, fixedIps field malformatted: %s", string(*obj["fixedIps"]))
 	}
 
+	if len(fixedIps) == 0 {
+		return nil, fmt.Errorf("failed, no ip address")
+	}
+
+	ip := fixedIps[0]["ipAddress"]
+	if len(fixedIps) > 1 {
+		for _, kv := range fixedIps {
+			if kv["subnetId"] == subnetID {
+				ip = kv["ipAddress"]
+			}
+		}
+	}
+
 	return &Port{
 		Status: PortStatus(*obj["status"]),
 		MAC:    string(*obj["macAddress"]),
-		IP:     fixedIps[0]["ipAddress"],
+		IP:     ip,
 	}, nil
 }
 
@@ -131,7 +144,7 @@ func genCreatePortBody(portID, targetNIC, targetNS string) (string, error) {
   "networkId": "%s",
   "vethName": "%s",
   "namespace": "%s",
-  "host" : "%s"
+  "hostId" : "%s"
 }
 `
 	hostname, err := os.Hostname()
