@@ -71,15 +71,19 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 	}()
 
-
 	mac, ip, err := provisionNIC(client, args.ContainerID, cniNS, nic, portId)
 	portCreated = true
 	if err != nil {
 		return err
 	}
 
-	// todo: verify nic in ns properly provisioned
+	err = pkg.FindNicInNs(nic, cniNS)
+	if err != nil {
+		err = fmt.Errorf("could not find interface %s in netns %s: %v", nic, cniNS, err)
+		return err
+	}
 
+	// todo: consider getting gateway ip address from Mizar-MP service directly
 	gw, _, err := pkg.GetV4Gateway(nic, cniNS)
 	r, err := collectResult(args.ContainerID, nic, mac, ip, *gw)
 	if err != nil {
