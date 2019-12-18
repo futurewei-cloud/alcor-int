@@ -2,10 +2,11 @@ package main_test
 
 import (
 	"bytes"
-	"github.com/containernetworking/cni/pkg/version"
-	"github.com/onsi/gomega/gexec"
 	"os/exec"
 	"testing"
+
+	"github.com/containernetworking/cni/pkg/version"
+	"github.com/onsi/gomega/gexec"
 )
 
 func TestVersion(t *testing.T) {
