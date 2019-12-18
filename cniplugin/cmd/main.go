@@ -3,14 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net"
+	"time"
+
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types/current"
 	"github.com/containernetworking/cni/pkg/version"
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"net"
-	"time"
 )
 
 const (
@@ -22,8 +23,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 	nic := args.IfName
 	cniNS := args.Netns
 
-	portCreated := false
-	portIDPersisted := false
+	startCreatePort := false
+	startPersistPortID := false
 	var err error
 
 	store := pkg.NewPortIDStore()
@@ -32,21 +33,21 @@ func cmdAdd(args *skel.CmdArgs) error {
 		portId = uuid.New().String()
 
 		// store port id in persistent storage which survives process exits
+		startPersistPortID = true
 		err = store.Record(portId, args.ContainerID, nic)
-		portIDPersisted = true
 		if err != nil {
-			return err
+			return fmt.Errorf("add op failed; cannot write port id in store: %v", err)
 		}
 	}
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
-		return err
+		return fmt.Errorf("add op failed; net conf not well formatted: %v", err)
 	}
 
 	client, err := pkg.New(netConf.MizarMPServiceURL)
 	if err != nil {
-		return err
+		return fmt.Errorf("add op failed; unable to get rest api client: %v", err)
 	}
 
 	defer func() {
@@ -54,44 +55,43 @@ func cmdAdd(args *skel.CmdArgs) error {
 			return	// no error, no roll back.
 		}
 
-		// to recover in case of failure
+		// to recover in case of partial failure
 		log.Errorf("Add op failed: %v", err)
 		log.Warningf("starting applicable recovery process...")
 
-		if portCreated {
+		if startCreatePort {
 			if e := client.Delete(netConf.ProjectID, portId); e != nil {
-				log.Warningf("recovery by port deletion had error: %v", e)
+				log.Warningf("recovery of port deletion had error: %v", e)
 			}
 		}
 
-		if portIDPersisted {
+		if startPersistPortID {
 			if e := store.Delete(args.ContainerID, nic); e != nil {
-				log.Warningf("recovery by port ID removal from persistent store has error: %v", e)
+				log.Warningf("recovery of port ID removal from persistent store had error: %v", e)
 			}
 		}
 	}()
 
+	startCreatePort = true
 	mac, ip, err := provisionNIC(client, netConf.ProjectID, netConf.SubnetID, args.ContainerID, netConf.HostID, cniNS, nic, portId)
-	portCreated = true
 	if err != nil {
-		return err
+		return fmt.Errorf("add op failed; cannot provision project %s port %q properly: %v", netConf.ProjectID, portId, err)
 	}
 
 	err = pkg.FindNicInNs(nic, cniNS)
 	if err != nil {
-		err = fmt.Errorf("could not find interface %s in netns %s: %v", nic, cniNS, err)
-		return err
+		return fmt.Errorf("add op failed; could not find interface %s in netns %s: %v", nic, cniNS, err)
 	}
 
 	subnet, err := client.GetSubnet(netConf.ProjectID, netConf.SubnetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("add op failed; unable to get subnet info: %v", err)
 	}
-	gw := subnet.Gateway
 
+	gw := subnet.Gateway
 	r, err := collectResult(args.ContainerID, nic, mac, ip, gw, subnet.Netmask)
 	if err != nil {
-		return err
+		return fmt.Errorf("add op failed; unable to collect network device info: %v", err)
 	}
 
 	versionedResult, err := r.GetAsVersion(netConf.CNIVersion)
@@ -161,20 +161,20 @@ func cmdDel(args *skel.CmdArgs) error {
 	store := pkg.NewPortIDStore()
 	portID, err := store.Get(args.ContainerID, args.IfName)
 	if err != nil {
-		log.Errorf("Del op failed with persistent store retrieval: %v", err)
-		return err
+		log.Warningf("fine for no record in store for sandbox %s dev %s: %v", args.ContainerID, args.IfName, err)
+		return nil
 	}
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
 		log.Errorf("Del op failed with net config file parsing: %v", err)
-		return err
+		return fmt.Errorf("del op failed; net config file in bad format: %v", err)
 	}
 
 	client, err := pkg.New(netConf.MizarMPServiceURL)
 	if err != nil {
 		log.Errorf("Del op failed to get Mizar-MP client: %v", err)
-		return err
+		return fmt.Errorf("del op failed; unable to get rest api client: %v", err)
 	}
 
 	if err := client.Delete(netConf.ProjectID, portID); err != nil {
@@ -183,7 +183,7 @@ func cmdDel(args *skel.CmdArgs) error {
 	}
 
 	if e := store.Delete(args.ContainerID, args.IfName); e != nil {
-		log.Warningf("Del op failed to clean up persistent port ID: %v", e)
+		log.Warningf("had error cleaning up persistent port ID: %v", e)
 	}
 
 	return nil
