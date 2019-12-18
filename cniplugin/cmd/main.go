@@ -3,11 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/containernetworking/cni/pkg/skel"
-	"github.com/containernetworking/cni/pkg/types/current"
 	"github.com/containernetworking/cni/pkg/version"
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 	"github.com/google/uuid"
@@ -73,7 +71,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	}()
 
 	startCreatePort = true
-	mac, ip, err := provisionNIC(client, netConf.ProjectID, netConf.SubnetID, args.ContainerID, netConf.HostID, cniNS, nic, portId)
+	mac, ip, err := nicProvision(client, netConf.ProjectID, netConf.SubnetID, portId, netConf.HostID, cniNS, nic)
 	if err != nil {
 		return fmt.Errorf("add op failed; cannot provision project %s port %q properly: %v", netConf.ProjectID, portId, err)
 	}
@@ -89,7 +87,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	}
 
 	gw := subnet.Gateway
-	r, err := collectResult(args.ContainerID, nic, mac, ip, gw, subnet.Netmask)
+	r, err := nicGetCNIResult(args.ContainerID, nic, mac, ip, gw, subnet.Netmask)
 	if err != nil {
 		return fmt.Errorf("add op failed; unable to collect network device info: %v", err)
 	}
@@ -102,57 +100,6 @@ func cmdAdd(args *skel.CmdArgs) error {
 	return versionedResult.Print()
 }
 
-func provisionNIC(client pkg.PortClient, projectID, subnetID, sandbox, targetHost, cniNS, nic, portId string) (mac, ip string, err error) {
-	if err := client.Create(projectID, subnetID, portId, targetHost, nic, cniNS); err != nil {
-		return "", "", err
-	}
-
-	// polling till port is up; get mac address & ip address
-	deadline := time.Now().Add(pollTimeout)
-	for {
-		info, err := client.Get(projectID, subnetID, portId)
-		if err != nil {
-			return "", "", err
-		}
-
-		if info.Status == pkg.PortStatusUP {
-			mac = info.MAC
-			ip = info.IP
-			return mac, ip, nil
-		}
-
-		if time.Now().After(deadline) {
-			return "", "", fmt.Errorf("timed out: port %q not ready", portId)
-		}
-
-		time.Sleep(pollInterval)
-	}
-
-	return "", "", fmt.Errorf("unexpected error, no port info")
-}
-
-func collectResult(sandbox, nic, mac, ip string, gw net.IP, netmask net.IPMask) (*current.Result, error){
-	var r current.Result
-	intf := &current.Interface{Name: nic, Mac: mac, Sandbox: sandbox}
-	i := 0
-	r.Interfaces = append(r.Interfaces, intf)
-
-	ipv4Net := net.IPNet{
-		IP:   net.ParseIP(ip),
-		Mask: netmask,
-	}
-
-	ipInfo := &current.IPConfig{
-		Version:   "4",
-		Interface: &i,
-		Address:   ipv4Net,
-		Gateway:   gw,
-	}
-
-	r.IPs = append(r.IPs, ipInfo)
-	return &r, nil
-}
-
 func cmdCheck(args *skel.CmdArgs) error {
 	return errors.New("not implemented")
 }
@@ -161,7 +108,7 @@ func cmdDel(args *skel.CmdArgs) error {
 	store := pkg.NewPortIDStore()
 	portID, err := store.Get(args.ContainerID, args.IfName)
 	if err != nil {
-		log.Warningf("fine for no record in store for sandbox %s dev %s: %v", args.ContainerID, args.IfName, err)
+		log.Warningf("find no port id in store for sandbox %s dev %s: %v", args.ContainerID, args.IfName, err)
 		return nil
 	}
 
