@@ -71,6 +71,22 @@ notes:
 nic info like MAC & IP address is returned in the response body;
 only when status is "UP" can the port considered as ready; it may timeout after some predefined period (1 minute in this implementation).  
 
+3. query subnet detail to get netmask & gateway IP
+* request
+<br/>method: GET
+<br/>URL: project/\<project-id\>/subnet/\<subnet-id\>
+* response
+<br/> sample body (omitting uninteresting info for brievity)
+```json
+{
+  "projectId": "xxxx-xxx-xxxx",
+  "id": "xxxx-xxx-xxxx",  //subnet-id
+  ...
+  "cidr": "192.168.100.0/24",
+  "gatewayIp": "192.168.100.1"
+}
+```
+
 ### Delete NIC
 method: DELETE
 URL: project/\<project-id\>/port/\<port-id\>
@@ -83,13 +99,15 @@ for now, plugin does not requires any authentication data to access Mizar-MP.
 * /etc/cni/net.d/mizarmp.conf
 // todo: specify host
 ```json
+{
   "cniVersion": "0.3.1",
   "name": "mizarmp-default",
   "type": "mizarmp",
   "mpurl": "http://127.0.0.1", //for onebox
   "subnet": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
   "project": "3dda2801-d675-4688-a63f-dcda8d327f50",
-  "host": "localhost"
+  "hostId": "localhost"
+}
 ```
 
 * /opt/cni/bin/mizarmp
