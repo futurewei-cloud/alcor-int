@@ -9,15 +9,15 @@ import (
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 )
 
-func nicProvision(client pkg.PortClient, projectID, subnetID, portId, targetHost, cniNS, nic string) (mac, ip string, err error) {
-	if err := client.Create(projectID, subnetID, portId, targetHost, nic, cniNS); err != nil {
+func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost, cniNS, nic string) (mac, ip string, err error) {
+	if err := client.Create(projectID, subnetID, portID, targetHost, nic, cniNS); err != nil {
 		return "", "", err
 	}
 
 	// polling till port is up; get mac address & ip address
 	deadline := time.Now().Add(pollTimeout)
 	for {
-		info, err := client.Get(projectID, subnetID, portId)
+		info, err := client.Get(projectID, subnetID, portID)
 		if err != nil {
 			return "", "", err
 		}
@@ -29,23 +29,21 @@ func nicProvision(client pkg.PortClient, projectID, subnetID, portId, targetHost
 		}
 
 		if time.Now().After(deadline) {
-			return "", "", fmt.Errorf("timed out: port %q not ready", portId)
+			return "", "", fmt.Errorf("timed out: port %q not ready", portID)
 		}
 
 		time.Sleep(pollInterval)
 	}
-
-	return "", "", fmt.Errorf("unexpected error, no port info")
 }
 
-func nicGetCNIResult(sandbox, nic, mac, ip string, gw net.IP, netmask net.IPMask) (*current.Result, error){
+func nicGetCNIResult(sandbox, nic, mac string, ip, gw net.IP, netmask net.IPMask) (*current.Result, error) {
 	var r current.Result
 	intf := &current.Interface{Name: nic, Mac: mac, Sandbox: sandbox}
 	i := 0
 	r.Interfaces = append(r.Interfaces, intf)
 
 	ipv4Net := net.IPNet{
-		IP:   net.ParseIP(ip),
+		IP:   ip,
 		Mask: netmask,
 	}
 

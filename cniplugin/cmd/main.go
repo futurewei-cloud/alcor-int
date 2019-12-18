@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/containernetworking/cni/pkg/skel"
@@ -13,34 +14,49 @@ import (
 )
 
 const (
-	pollTimeout = time.Second * 15
+	pollTimeout  = time.Second * 15
 	pollInterval = time.Second * 1
 )
 
 func cmdAdd(args *skel.CmdArgs) error {
 	nic := args.IfName
 	cniNS := args.Netns
+	sandbox := args.ContainerID
 
-	startCreatePort := false
-	startPersistPortID := false
+	startedToCreatePort := false
+	hasPersistedPortID := false
 	var err error
 
 	store := pkg.NewPortIDStore()
-	portId, e := store.Get(args.ContainerID, nic)
-	if e != nil || portId == "" {
-		portId = uuid.New().String()
+	portID, e := store.Get(sandbox, nic)
+	if e != nil || portID == "" {
+		portID = uuid.New().String()
 
 		// store port id in persistent storage which survives process exits
-		startPersistPortID = true
-		err = store.Record(portId, args.ContainerID, nic)
+		err = store.Record(portID, sandbox, nic)
 		if err != nil {
 			return fmt.Errorf("add op failed; cannot write port id in store: %v", err)
 		}
 	}
 
+	hasPersistedPortID = true
+
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
 		return fmt.Errorf("add op failed; net conf not well formatted: %v", err)
+	}
+
+	projectID := netConf.ProjectID
+	if len(projectID) == 0 {
+		return fmt.Errorf("invalid net conf file - no project ID")
+	}
+	subnetID := netConf.SubnetID
+	if len(subnetID) == 0 {
+		return fmt.Errorf("invalid net conf file - no subnet ID")
+	}
+	hostID := netConf.HostID
+	if len(hostID) == 0 {
+		return fmt.Errorf("invalid net conf file - no host ID")
 	}
 
 	client, err := pkg.New(netConf.MizarMPServiceURL)
@@ -50,30 +66,35 @@ func cmdAdd(args *skel.CmdArgs) error {
 
 	defer func() {
 		if err == nil {
-			return	// no error, no roll back.
+			return // no error, no roll back.
 		}
 
 		// to recover in case of partial failure
 		log.Errorf("Add op failed: %v", err)
 		log.Warningf("starting applicable recovery process...")
 
-		if startCreatePort {
-			if e := client.Delete(netConf.ProjectID, portId); e != nil {
+		if startedToCreatePort {
+			if e := client.Delete(projectID, portID); e != nil {
 				log.Warningf("recovery of port deletion had error: %v", e)
 			}
 		}
 
-		if startPersistPortID {
-			if e := store.Delete(args.ContainerID, nic); e != nil {
-				log.Warningf("recovery of port ID removal from persistent store had error: %v", e)
+		if hasPersistedPortID {
+			if e := store.Delete(sandbox, nic); e != nil {
+				log.Warningf("recovery of port ID removal from store had error: %v", e)
 			}
 		}
 	}()
 
-	startCreatePort = true
-	mac, ip, err := nicProvision(client, netConf.ProjectID, netConf.SubnetID, portId, netConf.HostID, cniNS, nic)
+	startedToCreatePort = true
+	mac, ip, err := nicProvision(client, projectID, subnetID, portID, hostID, cniNS, nic)
 	if err != nil {
-		return fmt.Errorf("add op failed; cannot provision project %s port %q properly: %v", netConf.ProjectID, portId, err)
+		return fmt.Errorf("add op failed; cannot provision project %s port %q properly: %v", projectID, portID, err)
+	}
+
+	nicIP := net.ParseIP(ip)
+	if nicIP == nil {
+		return fmt.Errorf("add op failed; invalid ip address %q", ip)
 	}
 
 	err = pkg.FindNicInNs(nic, cniNS)
@@ -81,13 +102,12 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return fmt.Errorf("add op failed; could not find interface %s in netns %s: %v", nic, cniNS, err)
 	}
 
-	subnet, err := client.GetSubnet(netConf.ProjectID, netConf.SubnetID)
+	subnet, err := client.GetSubnet(projectID, subnetID)
 	if err != nil {
 		return fmt.Errorf("add op failed; unable to get subnet info: %v", err)
 	}
 
-	gw := subnet.Gateway
-	r, err := nicGetCNIResult(args.ContainerID, nic, mac, ip, gw, subnet.Netmask)
+	r, err := nicGetCNIResult(sandbox, nic, mac, nicIP, subnet.Gateway, subnet.Netmask)
 	if err != nil {
 		return fmt.Errorf("add op failed; unable to collect network device info: %v", err)
 	}

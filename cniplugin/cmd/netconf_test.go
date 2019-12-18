@@ -29,4 +29,12 @@ func TestLoadNetConf(t *testing.T) {
 	if netConf.MizarMPServiceURL != "http://127.0.0.1" {
 		t.Errorf("mizar-mp service URL: expected http://127.0.0.1, got %q", netConf.MizarMPServiceURL)
 	}
+
+	if netConf.ProjectID != "3dda2801-d675-4688-a63f-dcda8d327f50" {
+		t.Errorf("expected '3dda2801-d675-4688-a63f-dcda8d327f50', got %q", netConf.ProjectID)
+	}
+
+	if netConf.SubnetID != "a87e0f87-a2d9-44ef-9194-9a62f178594e" {
+		t.Errorf("expected 'a87e0f87-a2d9-44ef-9194-9a62f178594e', got %q", netConf.SubnetID)
+	}
 }
