@@ -103,7 +103,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 }
 
 func provisionNIC(client pkg.PortClient, projectID, subnetID, sandbox, targetHost, cniNS, nic, portId string) (mac, ip string, err error) {
-	if err := client.Create(projectID, portId, targetHost, nic, cniNS); err != nil {
+	if err := client.Create(projectID, subnetID, portId, targetHost, nic, cniNS); err != nil {
 		return "", "", err
 	}
 

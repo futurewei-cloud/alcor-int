@@ -19,11 +19,6 @@ const (
 	PortStatusUP PortStatus = "UP"
 )
 
-const (
-	defaultProjectID = "3dda2801-d675-4688-a63f-dcda8d327f50"
-	defaultSubnetID  = "a87e0f87-a2d9-44ef-9194-9a62f178594e"
-)
-
 // Port is the interesting information of port
 type Port struct {
 	Status PortStatus
@@ -45,7 +40,7 @@ type subnet struct {
 
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
-	Create(projectID, portID, targetHost, targetNIC, targetNS string) error
+	Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error
 	Get(prohectID, subnetID, portID string) (*Port, error)
 	Delete(projectID, portID string) error
 	GetSubnet(prohectID, subnetID string) (*Subnet, error)
@@ -70,8 +65,8 @@ func New(mpURL string) (PortClient, error) {
 }
 
 // todo: may split into 2 REST calls: create port + bind host/ns
-func (m client) Create(projectID, portID, targetHost, targetNIC, targetNS string) error {
-	body, err := genCreatePortBody(portID, targetHost, targetNIC, targetNS)
+func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error {
+	body, err := genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS)
 	if err != nil {
 		return err
 	}
@@ -167,7 +162,7 @@ func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	}, nil
 }
 
-func genCreatePortBody(portID, targetHost, targetNIC, targetNS string) (string, error) {
+func genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) (string, error) {
 	const bodyTemplate = `
 {
   "projectId": "%s",
@@ -180,10 +175,10 @@ func genCreatePortBody(portID, targetHost, targetNIC, targetNS string) (string, 
 }
 `
 	body := fmt.Sprintf(bodyTemplate,
-		defaultProjectID,
+		projectID,
 		portID,
 		"k8s_"+portID,
-		defaultSubnetID,
+		subnetID,
 		targetNIC,
 		targetNS,
 		targetHost)
