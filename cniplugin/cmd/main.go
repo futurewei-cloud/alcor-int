@@ -71,7 +71,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 	}()
 
-	mac, ip, err := provisionNIC(client, netConf.ProjectID, netConf.SubnetID, args.ContainerID, cniNS, nic, portId)
+	mac, ip, err := provisionNIC(client, netConf.ProjectID, netConf.SubnetID, args.ContainerID, netConf.HostID, cniNS, nic, portId)
 	portCreated = true
 	if err != nil {
 		return err
@@ -102,8 +102,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 	return versionedResult.Print()
 }
 
-func provisionNIC(client pkg.PortClient, projectID, subnetID, sandbox, cniNS, nic, portId string) (mac, ip string, err error) {
-	if err := client.Create(projectID, portId, nic, cniNS); err != nil {
+func provisionNIC(client pkg.PortClient, projectID, subnetID, sandbox, targetHost, cniNS, nic, portId string) (mac, ip string, err error) {
+	if err := client.Create(projectID, portId, targetHost, nic, cniNS); err != nil {
 		return "", "", err
 	}
 
