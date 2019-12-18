@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 
@@ -46,7 +45,7 @@ type subnet struct {
 
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
-	Create(projectID, portID, targetNIC, targetNS string) error
+	Create(projectID, portID, targetHost, targetNIC, targetNS string) error
 	Get(prohectID, subnetID, portID string) (*Port, error)
 	Delete(projectID, portID string) error
 	GetSubnet(prohectID, subnetID string) (*Subnet, error)
@@ -71,8 +70,8 @@ func New(mpURL string) (PortClient, error) {
 }
 
 // todo: may split into 2 REST calls: create port + bind host/ns
-func (m client) Create(projectID, portID, targetNIC, targetNS string) error {
-	body, err := genCreatePortBody(portID, targetNIC, targetNS)
+func (m client) Create(projectID, portID, targetHost, targetNIC, targetNS string) error {
+	body, err := genCreatePortBody(portID, targetHost, targetNIC, targetNS)
 	if err != nil {
 		return err
 	}
@@ -168,7 +167,7 @@ func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	}, nil
 }
 
-func genCreatePortBody(portID, targetNIC, targetNS string) (string, error) {
+func genCreatePortBody(portID, targetHost, targetNIC, targetNS string) (string, error) {
 	const bodyTemplate = `
 {
   "projectId": "%s",
@@ -180,12 +179,6 @@ func genCreatePortBody(portID, targetNIC, targetNS string) (string, error) {
   "hostId" : "%s"
 }
 `
-	hostname, err := os.Hostname()
-	if err != nil {
-		return "", err
-	}
-	hostBaseName := strings.Split(hostname, ".")[0]
-
 	body := fmt.Sprintf(bodyTemplate,
 		defaultProjectID,
 		portID,
@@ -193,7 +186,7 @@ func genCreatePortBody(portID, targetNIC, targetNS string) (string, error) {
 		defaultSubnetID,
 		targetNIC,
 		targetNS,
-		hostBaseName)
+		targetHost)
 
 	return body, nil
 }
