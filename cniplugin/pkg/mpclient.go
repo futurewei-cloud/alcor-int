@@ -9,7 +9,7 @@ import (
 type PortStatus string
 
 const (
-	// the only status we care about is UP
+	// PortStatusUP is the only status we care about, UP
 	PortStatusUP PortStatus = "UP"
 )
 
@@ -17,7 +17,7 @@ const (
 type Port struct {
 	Status PortStatus
 	MAC    string
-	IP     string		// not in CIDR format; mere ip address like "10.0.0.4"
+	IP     string // not in CIDR format; mere ip address like "10.0.0.4"
 }
 
 //Subnet is the subnet info in Mizar-MP
@@ -29,9 +29,9 @@ type Subnet struct {
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
 	Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error
-	Get(prohectID, subnetID, portID string) (*Port, error)
+	Get(projectID, subnetID, portID string) (*Port, error)
 	Delete(projectID, portID string) error
-	GetSubnet(prohectID, subnetID string) (*Subnet, error)
+	GetSubnet(projectID, subnetID string) (*Subnet, error)
 }
 
 type client struct {

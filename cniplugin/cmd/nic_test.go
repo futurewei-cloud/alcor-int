@@ -4,6 +4,9 @@ import (
 	"net"
 	"reflect"
 	"testing"
+
+	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestNICGetCNIResult(t *testing.T) {
@@ -56,4 +59,64 @@ func TestNICGetCNIResult(t *testing.T) {
 	if !reflect.DeepEqual(r.IPs[0].Gateway, gw) {
 		t.Errorf("expected %v, got %v", gw, r.IPs[0].Gateway)
 	}
+}
+
+type mockedClient struct {
+	mock.Mock
+}
+
+func (m *mockedClient) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error {
+	args := m.Called(projectID, subnetID, portID, targetHost, targetNIC, targetNS)
+	return args.Error(0)
+}
+
+func (m *mockedClient) Get(projectID, subnetID, portID string) (*pkg.Port, error) {
+	args := m.Called(projectID, subnetID, portID)
+	return args.Get(0).(*pkg.Port), args.Error(1)
+}
+
+func (m *mockedClient) Delete(projectID, portID string) error {
+	args := m.Called(projectID, portID)
+	return args.Error(0)
+}
+
+func (m *mockedClient) GetSubnet(projectID, subnetID string) (*pkg.Subnet, error) {
+	args := m.Called(projectID, subnetID)
+	return args.Get(0).(*pkg.Subnet), args.Error(1)
+}
+
+func TestNICProvision(t *testing.T) {
+	projectID := "myproject"
+	subnetID := "mysubnet"
+	portID := "myport"
+	targetHost := "mine"
+	cniNS := "/run/netns/x"
+	nic := "eth0"
+
+	fakePort := pkg.Port{
+		Status: "UP",
+		MAC:    "mymac",
+		IP:     "4.3.2.1",
+	}
+
+	client := &mockedClient{}
+	client.On("Create", projectID, subnetID, portID, targetHost, nic, cniNS).Return(nil)
+	client.On("Get", projectID, subnetID, portID).Return(&fakePort, nil)
+
+	mac, ip, err := nicProvision(client, projectID, subnetID, portID, targetHost, cniNS, nic, 0, 0)
+
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	t.Logf("mac: %v, ip: %v", mac, ip)
+	if mac != "mymac" {
+		t.Errorf("expected mymac, got %q", mac)
+	}
+
+	if "4.3.2.1" != ip {
+		t.Errorf("expected 4.3.2.1, got %q", ip)
+	}
+
+	client.AssertExpectations(t)
 }
