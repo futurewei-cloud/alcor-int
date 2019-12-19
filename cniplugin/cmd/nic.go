@@ -9,13 +9,13 @@ import (
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 )
 
-func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost, cniNS, nic string) (mac, ip string, err error) {
+func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost, cniNS, nic string, timeout, interval time.Duration) (mac, ip string, err error) {
 	if err := client.Create(projectID, subnetID, portID, targetHost, nic, cniNS); err != nil {
 		return "", "", err
 	}
 
 	// polling till port is up; get mac address & ip address
-	deadline := time.Now().Add(pollTimeout)
+	deadline := time.Now().Add(timeout)
 	for {
 		info, err := client.Get(projectID, subnetID, portID)
 		if err != nil {
@@ -32,7 +32,7 @@ func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost
 			return "", "", fmt.Errorf("timed out: port %q not ready", portID)
 		}
 
-		time.Sleep(pollInterval)
+		time.Sleep(interval)
 	}
 }
 
