@@ -27,44 +27,111 @@ Below is the overall interactions between relevant components: ![Sequence Diagra
 
 ### Create NIC
 1. sends create-port request with the target namespace parameter, gets port-id
-* request
+* Single port request
 method: POST
-URL: project/\<project-id\>/port
+URL: project/\<project-id\>/ports
 body
 ```json
 {
-  "projectId": "<default-project-uuid>",
-  "id": "<cni-generated-uuid>",
-  "name": "k8s_<port-id>",
-  "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
-  "networkId": "<default-subnet-uuid>",
-  "vethName": "eth0",
-  "namespace": "<cni-created-netns>",
-  "hostId" : "<host-id>"
+    "port": {
+        "project_id": "<default-project-uuid>",
+        "id": "<cni-generated-uuid>",
+        "name": "k8s_<port-id>",
+        "admin_state_up": true,
+        "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
+        "network_id": "<default-subnet-uuid>",
+        "veth_name": "eth0",
+        "veth_namespace": "<cni-created-netns>",
+        "dns_domain": "my-domain.org.",
+        "dns_name": "myport",
+        "port_security_enabled": false,
+        "allowed_address_pairs": [
+            { }
+        ],
+        "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
+        "binding:profile": { },
+        "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+    }
 }
 ```
-notes: namespace value is the netns Kubernetes has created for the pod and passed it to CNI plugin, which will pass on the Mizar-MP for the agent to place nic into; host-id is the id of this host registered in mizar-mp. 
+note: vethNamespace value is the netns Kubernetes has created for the pod and passed it to CNI plugin, which will pass on the Mizar-MP for the agent to place nic into;
+binding:host_id is the id of this host registered in mizar-mp, and it must be known by both K8s and Mizar-MP during bootstrap. 
 * response
+code: 201-Created, if successful
+* Bulk create ports
+method: POST
+URL: project/\<project-id\>/ports
+body
+```json
+{
+    "ports": [
+        {
+            "project_id": "<default-project-uuid>",
+            "id": "<cni-generated-uuid>",
+            "name": "k8s_<port-id>",
+            "admin_state_up": true,
+            "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
+            "network_id": "<default-subnet-uuid>",
+            "veth_name": "eth0",
+            "veth_namespace": "<cni-created-netns>",
+            "dns_domain": "my-domain.org.",
+            "dns_name": "myport",
+            "port_security_enabled": false,
+            "allowed_address_pairs": [
+                { }
+            ],
+            "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
+            "binding:profile": { },
+            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+        },
+        {
+            "project_id": "<default-project-uuid>",
+            "id": "<cni-generated-uuid>",
+            "name": "k8s_<port-id>",
+            "admin_state_up": true,
+            "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
+            "network_id": "<default-subnet-uuid>",
+            "veth_name": "eth0",
+            "veth_namespace": "<cni-created-netns>",
+            "dns_domain": "my-domain.org.",
+            "dns_name": "myport",
+            "port_security_enabled": false,
+            "allowed_address_pairs": [
+                { }
+            ],
+            "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
+            "binding:profile": { },
+            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+        }
+    ]
+}
+```
 code: 201-Created, if successful
 
 2. polling get-port till the port is in up state.
 * request
 method: GET
-URL: project/\<project-id\>/port/\<port-id\>
+URL: project/\<project-id\>/ports/\<port-id\>
 * response
 body
 ```json
 {
-  "projectId": "<project-uuid>",
-  "id": "<port-id>",
-  ...
-  "status": "<state>", // state could be PENDING, UP, etc
-  ...
-  "macAddress": "<mac-address>",
-  "fixedIps": [
-    {"subnetId": "<default-subnet-uuid>", "ipAddress": "<ip-address>"}
-  ],
-  ... 
+    "port": 
+    {
+      "project_id": "<project-uuid>",
+      "id": "<port-id>",
+      ...
+      "status": "<UP/DOWN/PENDING>",
+      ...
+      "mac_address": "<mac-address>",
+      "fixed_ips": [
+        {  
+          "subnet_id": "<default-subnet-uuid>",
+          "ip_address": "<ip-address>"
+        }
+      ],
+      ... 
+    }
 }
 ```
 notes:
@@ -74,22 +141,24 @@ only when status is "UP" can the port considered as ready; it may timeout after 
 3. query subnet detail to get netmask & gateway IP
 * request
 <br/>method: GET
-<br/>URL: project/\<project-id\>/subnet/\<subnet-id\>
+<br/>URL: project/\<project-id\>/subnets/\<subnet-id\>
 * response
 <br/> sample body (omitting uninteresting info for brievity)
 ```json
 {
-  "projectId": "xxxx-xxx-xxxx",
-  "id": "xxxx-xxx-xxxx",  //subnet-id
-  ...
-  "cidr": "192.168.100.0/24",
-  "gatewayIp": "192.168.100.1"
+    "subnet": {
+      "project_id": "xxxx-xxx-xxxx",
+      "id": "xxxx-xxx-xxxx",
+      ...
+      "cidr": "192.168.100.0/24",
+      "gateway_ip": "192.168.100.1"    
+    }
 }
 ```
 
 ### Delete NIC
 method: DELETE
-URL: project/\<project-id\>/port/\<port-id\>
+URL: project/\<project-id\>/ports/\<port-id\>
 Response Code: 204 if successfully deleted
 
 ## Deployment on Dev Onebox node
