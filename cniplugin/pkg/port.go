@@ -18,7 +18,7 @@ func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targe
 	}
 
 	url := *m.url
-	url.Path = path.Join(url.Path, "project", projectID, "port")
+	url.Path = path.Join(url.Path, "project", projectID, "ports")
 	client := resty.New().R().SetHeader("Content-Type", "application/json")
 	resp, err := client.SetBody(body).Post(url.String())
 	if err != nil {
@@ -34,7 +34,7 @@ func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targe
 
 func (m client) Get(projectID, subnetID, portID string) (*Port, error) {
 	url := *m.url
-	url.Path = path.Join(url.Path, "project", projectID, "port", portID)
+	url.Path = path.Join(url.Path, "project", projectID, "ports", portID)
 	resp, err := resty.New().R().Get(url.String())
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (m client) Get(projectID, subnetID, portID string) (*Port, error) {
 
 func (m client) Delete(projectID, portID string) error {
 	url := *m.url
-	url.Path = path.Join(url.Path, "project", projectID, "port", portID)
+	url.Path = path.Join(url.Path, "project", projectID, "ports", portID)
 	resp, err := resty.New().R().Delete(url.String())
 	if err != nil {
 		return err

@@ -34,7 +34,7 @@ func parseSubnetInfo(data []byte) (*Subnet, error) {
 
 func (m client) GetSubnet(projectID, subnetID string) (*Subnet, error) {
 	url := *m.url
-	url.Path = path.Join(url.Path, "project", projectID, "subnet", subnetID)
+	url.Path = path.Join(url.Path, "project", projectID, "subnets", subnetID)
 	resp, err := resty.New().R().Get(url.String())
 	if err != nil {
 		return nil, err
