@@ -11,8 +11,10 @@ import (
 
 // subnet is struct to facilitate json parsing
 type subnet struct {
-	GatewayIP string `json:"gatewayIp"`
-	CIDR string `json:"cidr"`
+	Subnet struct {
+		GatewayIP string `json:"gateway_ip"`
+		CIDR string `json:"cidr"`
+	} `json: "subnet"`
 }
 
 func parseSubnetInfo(data []byte) (*Subnet, error) {
@@ -21,8 +23,8 @@ func parseSubnetInfo(data []byte) (*Subnet, error) {
 		return nil, err
 	}
 
-	gwip := net.ParseIP(subnet.GatewayIP)
-	_, netmask, err := net.ParseCIDR(subnet.CIDR)
+	gwip := net.ParseIP(subnet.Subnet.GatewayIP)
+	_, netmask, err := net.ParseCIDR(subnet.Subnet.CIDR)
 	if err != nil {
 		return nil, err
 	}

@@ -8,8 +8,10 @@ import (
 
 func TestParseSubnetInfo(t *testing.T) {
 	body := `{
-  "gatewayIp": "10.0.0.1",
-  "cidr": "10.0.0.0/24"
+  "subnet": {
+    "cidr": "10.0.0.0/24",
+    "gateway_ip": "10.0.0.1"
+  }
 }`
 	subnet, err := parseSubnetInfo([]byte(body))
 	if err != nil {

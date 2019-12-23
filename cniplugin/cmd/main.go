@@ -87,7 +87,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	}()
 
 	startedToCreatePort = true
-	mac, ip, err := nicProvision(client, projectID, subnetID, portID, hostID, cniNS, nic, pollTimeout, pollInterval)
+	mac, ip, err := nicProvision(client, projectID, subnetID, portID, hostID, sandbox, cniNS, nic, pollTimeout, pollInterval)
 	if err != nil {
 		return fmt.Errorf("add op failed; cannot provision project %s port %q properly: %v", projectID, portID, err)
 	}

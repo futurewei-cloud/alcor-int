@@ -28,7 +28,7 @@ type Subnet struct {
 
 // PortClient is the interface to request Mizar-MP to work at ports
 type PortClient interface {
-	Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error
+	Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) error
 	Get(projectID, subnetID, portID string) (*Port, error)
 	Delete(projectID, portID string) error
 	GetSubnet(projectID, subnetID string) (*Subnet, error)
