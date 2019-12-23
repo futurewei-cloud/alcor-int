@@ -65,8 +65,8 @@ type mockedClient struct {
 	mock.Mock
 }
 
-func (m *mockedClient) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error {
-	args := m.Called(projectID, subnetID, portID, targetHost, targetNIC, targetNS)
+func (m *mockedClient) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) error {
+	args := m.Called(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox)
 	return args.Error(0)
 }
 
@@ -92,6 +92,7 @@ func TestNICProvision(t *testing.T) {
 	targetHost := "mine"
 	cniNS := "/run/netns/x"
 	nic := "eth0"
+	sandbox := "cnicontainer"
 
 	fakePort := pkg.Port{
 		Status: "UP",
@@ -100,10 +101,10 @@ func TestNICProvision(t *testing.T) {
 	}
 
 	client := &mockedClient{}
-	client.On("Create", projectID, subnetID, portID, targetHost, nic, cniNS).Return(nil)
+	client.On("Create", projectID, subnetID, portID, targetHost, nic, cniNS, sandbox).Return(nil)
 	client.On("Get", projectID, subnetID, portID).Return(&fakePort, nil)
 
-	mac, ip, err := nicProvision(client, projectID, subnetID, portID, targetHost, cniNS, nic, 0, 0)
+	mac, ip, err := nicProvision(client, projectID, subnetID, portID, targetHost, sandbox, cniNS, nic, 0, 0)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)

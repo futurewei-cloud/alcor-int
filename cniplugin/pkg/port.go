@@ -3,15 +3,16 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // todo: may split into 2 REST calls: create port + bind host/ns
-func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) error {
-	body, err := genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS)
+func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) error {
+	body, err := genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox)
 	if err != nil {
 		return err
 	}
@@ -92,22 +93,41 @@ func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 	}, nil
 }
 
-func genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS string) (string, error) {
+func genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) (string, error) {
 	const bodyTemplate = `
 {
-  "projectId": "%s",
-  "id": "%s",
-  "name": "%s",
-  "networkId": "%s",
-  "vethName": "%s",
-  "namespace": "%s",
-  "hostId" : "%s"
+  "port": {
+    "project_id": "%s",
+    "id": "%s",
+    "name": "%s",
+    "admin_state_up": true,
+    "description": "%s",
+    "network_id": "%s",
+    "veth_name": "%s",
+    "veth_namespace": "%s",
+    "dns_domain": "my-domain.org.",
+    "dns_name": "myport",
+    "port_security_enabled": false,
+    "binding:host_id": "%s"
+  }
 }
 `
+	if len(projectID) == 0 ||
+		len(subnetID) == 0 ||
+		len(portID) == 0 ||
+		len(targetHost) == 0 ||
+		len(targetNS) == 0 ||
+		len(targetNIC) == 0 ||
+		len(cniSandbox) == 0 {
+		return "", fmt.Errorf("invalid input: empty value not allowed")
+	}
+
+	desc := fmt.Sprintf("cni %s, ns:%s, host:%s", cniSandbox, targetNS, targetHost)
 	body := fmt.Sprintf(bodyTemplate,
 		projectID,
 		portID,
 		"k8s_"+portID,
+		desc,
 		subnetID,
 		targetNIC,
 		targetNS,

@@ -9,8 +9,8 @@ import (
 	"github.com/futurewei-cloud/mizar-mp/cniplugin/pkg"
 )
 
-func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost, cniNS, nic string, timeout, interval time.Duration) (mac, ip string, err error) {
-	if err := client.Create(projectID, subnetID, portID, targetHost, nic, cniNS); err != nil {
+func nicProvision(client pkg.PortClient, projectID, subnetID, portID, targetHost, cniSandbox, cniNS, nic string, timeout, interval time.Duration) (mac, ip string, err error) {
+	if err := client.Create(projectID, subnetID, portID, targetHost, nic, cniNS, cniSandbox); err != nil {
 		return "", "", err
 	}
 

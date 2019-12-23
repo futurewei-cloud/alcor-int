@@ -87,3 +87,40 @@ func TestParseGetPortResp(t *testing.T) {
 		}
 	}
 }
+
+func TestGenCreatePortBody(t *testing.T) {
+	projectID := "3dda2801-d675-4688-a63f-dcda8d327f50"
+	subnetID := "a87e0f87-a2d9-44ef-9194-9a62f178594e"
+	portID := "12345678-abcd-efgh-ijkl-ABCDEFGHIJKL"
+	targetHost := "myhost"
+	targetNS := "/run/netns/myns"
+	targetNIC := "eth0"
+	cniSandbox := "cafe123456"
+
+	expectedBody := `
+{
+  "port": {
+    "project_id": "3dda2801-d675-4688-a63f-dcda8d327f50",
+    "id": "12345678-abcd-efgh-ijkl-ABCDEFGHIJKL",
+    "name": "k8s_12345678-abcd-efgh-ijkl-ABCDEFGHIJKL",
+    "admin_state_up": true,
+    "description": "cni cafe123456, ns:/run/netns/myns, host:myhost",
+    "network_id": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
+    "veth_name": "eth0",
+    "veth_namespace": "/run/netns/myns",
+    "dns_domain": "my-domain.org.",
+    "dns_name": "myport",
+    "port_security_enabled": false,
+    "binding:host_id": "myhost"
+  }
+}
+`
+	body, err := genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if body != expectedBody {
+		t.Errorf("\nexpected %q, \n     got %q\n", expectedBody, body)
+	}
+}
