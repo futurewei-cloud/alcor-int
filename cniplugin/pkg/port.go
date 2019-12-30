@@ -10,7 +10,6 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// todo: may split into 2 REST calls: create port + bind host/ns
 func (m client) Create(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) error {
 	body, err := genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox)
 	if err != nil {
@@ -68,29 +67,65 @@ func parseGetPortResp(subnetID string, body []byte) (*Port, error) {
 		return nil, fmt.Errorf("failed, not json body: %s", string(body))
 	}
 
+	if _, ok := obj["port"]; !ok {
+		return nil, fmt.Errorf("failed, could not find port key: %s", string(body))
+	}
+
+	return parsePortDetail(subnetID, []byte(*obj["port"]))
+}
+
+func parsePortDetail(subnetID string, body []byte) (*Port, error) {
+	const KeyFixedIPs = "fixed_ips"
+	const KeyMacAddress = "mac_address"
+	const KeyStatus = "status"
+
+	var obj map[string]*json.RawMessage
+	if err := json.Unmarshal(body, &obj); err != nil {
+		return nil, fmt.Errorf("failed, port detail is not json body: %s", string(body))
+	}
+
+	fixedIPs, ok := obj[KeyFixedIPs]
+	if !ok {
+		return nil, fmt.Errorf("failed, could not find fixed_ips: %s", string(body))
+	}
+
+	ip, err := parsePortFixedIPs(subnetID, []byte(*fixedIPs))
+	if err != nil {
+		return nil, err
+	}
+
+	return &Port{
+		Status: PortStatus(strings.Trim(string(*obj[KeyStatus]), `"`)),
+		MAC:    strings.Trim(string(*obj[KeyMacAddress]), `"`),
+		IP:     ip,
+	}, nil
+}
+
+func parsePortFixedIPs(subnetID string, body []byte) (string, error) {
+	const KeyIPAddress = "ip_address"
+	const KeySubnetID = "subnet_id"
+
 	var fixedIps []map[string]string
-	if err := json.Unmarshal([]byte(*obj["fixedIps"]), &fixedIps); err != nil {
-		return nil, fmt.Errorf("failed, fixedIps field malformatted: %s", string(*obj["fixedIps"]))
+	if err := json.Unmarshal(body, &fixedIps); err != nil {
+		return "", fmt.Errorf("failed, fixed_ips field is malformated: %s", string(body))
 	}
 
 	if len(fixedIps) == 0 {
-		return nil, fmt.Errorf("failed, no ip address")
+		return "", fmt.Errorf("failed, no ip address")
 	}
 
-	ip := fixedIps[0]["ipAddress"]
+	ip := fixedIps[0][KeyIPAddress]
 	if len(fixedIps) > 1 {
 		for _, kv := range fixedIps {
-			if kv["subnetId"] == subnetID {
-				ip = kv["ipAddress"]
+			if currSubnetID, ok := kv[KeySubnetID]; ok {
+				if currSubnetID == subnetID {
+					ip = kv[KeyIPAddress]
+				}
 			}
 		}
 	}
 
-	return &Port{
-		Status: PortStatus(strings.Trim(string(*obj["status"]), `"`)),
-		MAC:    strings.Trim(string(*obj["macAddress"]), `"`),
-		IP:     ip,
-	}, nil
+	return ip, nil
 }
 
 func genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targetNS, cniSandbox string) (string, error) {

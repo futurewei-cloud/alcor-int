@@ -7,53 +7,59 @@ import (
 func TestParseGetPortResp(t *testing.T) {
 	subnetID := "a87e0f87-a2d9-44ef-9194-9a62f178594e"
 
-	tcs := []struct{
-		desc string
-		responseBody string
+	tcs := []struct {
+		desc                                    string
+		responseBody                            string
 		expectedIP, expectedMAC, expectedStatus string
-		expectingError bool
-	} {
+		expectingError                          bool
+	}{
 		{
 			desc: "single record",
 			responseBody: `
 {
-  "portId":"1111111",
-  "status":"UP",
-  "macAddress":"02:42:32:43:60:bf",
-  "fixedIps":[
-    {"subnetId":"----", "ipAddress":"123.45.67.8"}
-  ]
+  "port": {
+    "port_id":"1111111",
+    "status":"UP",
+    "mac_address":"02:42:32:43:60:bf",
+    "fixed_ips":[
+      {"subnet_id":"----", "ip_address":"123.45.67.8"}
+    ]
+  }
 }
-`,			expectedIP: "123.45.67.8",
-			expectedMAC: "02:42:32:43:60:bf",
+`, expectedIP: "123.45.67.8",
+			expectedMAC:    "02:42:32:43:60:bf",
 			expectedStatus: "UP",
 		},
 		{
 			desc: "multi records",
 			responseBody: `
 {
-  "portId":"1111111",
-  "status":"WIP",
-  "macAddress":"00:11:22:33:44:55",
-  "fixedIps":[
-    {"subnetId":"11111111-1111-1111-1111-111111111111", "ipAddress":"1.1.1.1"},
-    {"subnetId":"a87e0f87-a2d9-44ef-9194-9a62f178594e", "ipAddress":"2.2.2.2"}
-  ]
+  "port": {
+    "portId":"1111111",
+    "status":"WIP",
+    "mac_address":"00:11:22:33:44:55",
+    "fixed_ips":[
+      {"subnet_id":"11111111-1111-1111-1111-111111111111", "ip_address":"1.1.1.1"},
+      {"subnet_id":"a87e0f87-a2d9-44ef-9194-9a62f178594e", "ip_address":"2.2.2.2"}
+    ]
+  }
 }
-`,			expectedIP: "2.2.2.2",
-			expectedMAC: "00:11:22:33:44:55",
+`, expectedIP: "2.2.2.2",
+			expectedMAC:    "00:11:22:33:44:55",
 			expectedStatus: "WIP",
 		},
 		{
 			desc: "no ip record",
 			responseBody: `
 {
-  "portId":"1111111",
-  "status":"UP",
-  "macAddress":"02:42:32:43:60:bf",
-  "fixedIps":[]
+  "port": {
+    "portId":"1111111",
+    "status":"UP",
+    "mac_address":"02:42:32:43:60:bf",
+    "fixed_ips":[]
+  }
 }
-`,			expectingError: true,
+`, expectingError: true,
 		},
 	}
 
