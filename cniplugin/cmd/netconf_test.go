@@ -8,7 +8,7 @@ func TestLoadNetConf(t *testing.T) {
   "cniVersion": "0.3.1",
   "name": "mizarmp-default",
   "type": "mizarmp",
-  "mpurl": "http://127.0.0.1",
+  "mpurl": "http://127.0.0.1:8080",
   "subnet": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
   "project": "3dda2801-d675-4688-a63f-dcda8d327f50",
   "hostId": "localhost"
@@ -26,8 +26,8 @@ func TestLoadNetConf(t *testing.T) {
 		t.Errorf("host id: expected localhost, got %q", netConf.HostID)
 	}
 
-	if netConf.MizarMPServiceURL != "http://127.0.0.1" {
-		t.Errorf("mizar-mp service URL: expected http://127.0.0.1, got %q", netConf.MizarMPServiceURL)
+	if netConf.MizarMPServiceURL != "http://127.0.0.1:8080" {
+		t.Errorf("mizar-mp service URL: expected http://127.0.0.1:8080, got %q", netConf.MizarMPServiceURL)
 	}
 
 	if netConf.ProjectID != "3dda2801-d675-4688-a63f-dcda8d327f50" {
