@@ -3,15 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/containernetworking/cni/pkg/types"
 )
 
 type netConf struct {
 	types.NetConf
 	MizarMPServiceURL string `json:"mpurl"`
-	ProjectID string `json:"project"`
-	SubnetID string `json:"subnet"`
-	HostID string `json:"hostId"`
+	ProjectID         string `json:"project"`
+	SubnetID          string `json:"subnet"`
+	HostID            string `json:"hostId"`
 }
 
 func loadNetConf(data []byte) (*netConf, error) {
