@@ -113,11 +113,17 @@ func TestGenCreatePortBody(t *testing.T) {
     "description": "cni cafe123456, ns:/run/netns/myns, host:myhost",
     "network_id": "a87e0f87-a2d9-44ef-9194-9a62f178594e",
     "veth_name": "eth0",
-    "veth_namespace": "/run/netns/myns",
+    "network_ns": "/run/netns/myns",
     "dns_domain": "my-domain.org.",
     "dns_name": "myport",
-    "port_security_enabled": false,
-    "binding:host_id": "myhost"
+	"port_security_enabled": false,
+	"allowed_address_pairs": [
+        { }
+    ],
+    "binding:host_id": "myhost",
+	"binding:profile": null,
+	"binding:vnic_type": "normal",
+    "fast_path": true
   }
 }
 `

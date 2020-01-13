@@ -101,8 +101,9 @@ body
                 { }
             ],
             "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
-            "binding:profile": { },
-            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+            "binding:profile": null,
+            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>",
+            "fast_path": true
         }
     ]
 }
