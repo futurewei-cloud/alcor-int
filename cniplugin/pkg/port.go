@@ -139,11 +139,17 @@ func genCreatePortBody(projectID, subnetID, portID, targetHost, targetNIC, targe
     "description": "%s",
     "network_id": "%s",
     "veth_name": "%s",
-    "veth_namespace": "%s",
+    "network_ns": "%s",
     "dns_domain": "my-domain.org.",
     "dns_name": "myport",
-    "port_security_enabled": false,
-    "binding:host_id": "%s"
+	"port_security_enabled": false,
+	"allowed_address_pairs": [
+        { }
+    ],
+    "binding:host_id": "%s",
+	"binding:profile": null,
+	"binding:vnic_type": "normal",
+    "fast_path": true
   }
 }
 `

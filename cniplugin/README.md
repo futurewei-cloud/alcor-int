@@ -41,7 +41,7 @@ body
         "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
         "network_id": "<default-subnet-uuid>",
         "veth_name": "eth0",
-        "veth_namespace": "<cni-created-netns>",
+        "network_ns": "<cni-created-netns>",
         "dns_domain": "my-domain.org.",
         "dns_name": "myport",
         "port_security_enabled": false,
@@ -49,8 +49,9 @@ body
             { }
         ],
         "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
-        "binding:profile": { },
-        "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+        "binding:profile": null,
+        "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>",
+        "fast_path": true
     }
 }
 ```
@@ -100,8 +101,9 @@ body
                 { }
             ],
             "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
-            "binding:profile": { },
-            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+            "binding:profile": null,
+            "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>",
+            "fast_path": true
         }
     ]
 }
