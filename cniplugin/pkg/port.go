@@ -54,7 +54,7 @@ func (m client) Delete(projectID, portID string) error {
 		return err
 	}
 
-	if resp.StatusCode() != http.StatusNoContent {
+	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("failed, method=DELETE, url=%s, status cod=%d", m.url.String(), resp.StatusCode())
 	}
 
