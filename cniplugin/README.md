@@ -41,16 +41,17 @@ body
         "description": "cni <sandbox-id>, ns:<netns>, host:<hostname>",
         "network_id": "<default-subnet-uuid>",
         "veth_name": "eth0",
-        "veth_namespace": "<cni-created-netns>",
-        "dns_domain": "my-domain.org.",
-        "dns_name": "myport",
+        "network_ns": "<cni-passed-in-netns>",  //e.g. "/var/run/netns/x"
+        "dns_domain": "my-domain.org.",         //optional; not used by cni plugin right now
+        "dns_name": "myport",                   //optional; not used by cni plugin right now
         "port_security_enabled": false,
         "allowed_address_pairs": [
             { }
         ],
         "binding:host_id": "<<host_uuid_agreed_by_k8s_and_alcor>>",
-        "binding:profile": { },
-        "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>"
+        "binding:profile": null,
+        "binding:vnic_type": "<<normal/macvtap/direct/baremetal/smart-nic, default is normal>>",
+        "fast_path": true
     }
 }
 ```
@@ -159,7 +160,7 @@ only when status is "UP" can the port considered as ready; it may timeout after 
 ### Delete NIC
 method: DELETE
 URL: project/\<project-id\>/ports/\<port-id\>
-Response Code: 204 if successfully deleted
+Response Code: 200 if successfully deleted
 
 ## Deployment on Dev Onebox node
 * mizar-mp authentication info
