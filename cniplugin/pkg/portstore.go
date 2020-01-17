@@ -18,7 +18,7 @@ import (
 	"path"
 )
 
-const defaultStoreRootPath = "/etc/mizarmp_ports/"
+const defaultStoreRootPath = "/run/mizarmp/mizarmp_ports/"
 
 // PortIDStore keeps poirt id for sandbox/nic in persistent storage
 type PortIDStore struct {
