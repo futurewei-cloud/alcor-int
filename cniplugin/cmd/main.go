@@ -47,6 +47,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		// store port id in persistent storage which survives process exits
 		err = store.Record(portID, sandbox, nic)
 		if err != nil {
+			log.Errorf("add op failed; cannot write port id in store: %v", err)
 			return fmt.Errorf("add op failed; cannot write port id in store: %v", err)
 		}
 	}
@@ -55,24 +56,29 @@ func cmdAdd(args *skel.CmdArgs) error {
 
 	netConf, err := loadNetConf(args.StdinData)
 	if err != nil {
+		log.Errorf("add op failed; net conf not well formatted: %v", err)
 		return fmt.Errorf("add op failed; net conf not well formatted: %v", err)
 	}
 
 	projectID := netConf.ProjectID
 	if len(projectID) == 0 {
+		log.Errorf("invalid net conf file - no project ID")
 		return fmt.Errorf("invalid net conf file - no project ID")
 	}
 	subnetID := netConf.SubnetID
 	if len(subnetID) == 0 {
+		log.Errorf("invalid net conf file - no subnet ID")
 		return fmt.Errorf("invalid net conf file - no subnet ID")
 	}
 	hostID := netConf.HostID
 	if len(hostID) == 0 {
+		log.Errorf("invalid net conf file - no host ID")
 		return fmt.Errorf("invalid net conf file - no host ID")
 	}
 
 	client, err := pkg.New(netConf.MizarMPServiceURL)
 	if err != nil {
+		log.Errorf("add op failed; unable to get rest api client: %v", err)
 		return fmt.Errorf("add op failed; unable to get rest api client: %v", err)
 	}
 
@@ -106,26 +112,31 @@ func cmdAdd(args *skel.CmdArgs) error {
 
 	nicIP := net.ParseIP(ip)
 	if nicIP == nil {
+		log.Errorf("add op failed; invalid ip address %q", ip)
 		return fmt.Errorf("add op failed; invalid ip address %q", ip)
 	}
 
 	err = pkg.FindNicInNs(nic, cniNS)
 	if err != nil {
+		log.Errorf("add op failed; could not find interface %s in netns %s: %v", nic, cniNS, err)
 		return fmt.Errorf("add op failed; could not find interface %s in netns %s: %v", nic, cniNS, err)
 	}
 
 	subnet, err := client.GetSubnet(projectID, subnetID)
 	if err != nil {
+		log.Errorf("add op failed; unable to get subnet info: %v", err)
 		return fmt.Errorf("add op failed; unable to get subnet info: %v", err)
 	}
 
 	r, err := nicGetCNIResult(sandbox, nic, mac, nicIP, subnet.Gateway, subnet.Netmask)
 	if err != nil {
+		log.Errorf("add op failed; unable to collect network device info: %v", err)
 		return fmt.Errorf("add op failed; unable to collect network device info: %v", err)
 	}
 
 	versionedResult, err := r.GetAsVersion(netConf.CNIVersion)
 	if err != nil {
+		log.Errorf("failed to get versioned result: %v", err)
 		return fmt.Errorf("failed to get versioned result: %v", err)
 	}
 
