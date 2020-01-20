@@ -63,7 +63,7 @@ This document layout the Mizar programming flow based on https://github.com/futu
   * are we calling this for loop too many times after the first 1.2.1. call?
   * if yes, I guess it doesn't hurt a lot to program the same thing multiple times.
 
-## 2. create_network(self, vni, netid, cidr, switches):
+## 2. controller.create_network(self, vni, netid, cidr, switches):
         """
         Creates a network in a VPC identified by VNI.
         1. Call create_network in that VPC
@@ -96,11 +96,76 @@ This document layout the Mizar programming flow based on https://github.com/futu
   * call 1.1.1. r.update_net(self.networks[netid], droplet)
 
 
-## 3. create_simple_endpoint(self, vni, netid, ip, host):
+## 3. controller.create_simple_endpoint(self, vni, netid, ip, host):
 
-* 1
-* 2
+* call 3.1. self.vpcs[vni].create_simple_endpoint(netid, ip, self.droplets[host])
 
+### 3.1. vpc.create_simple_endpoint(self, netid, ip, host):
+        """
+        Creates a new simple endpoint in a network within the vpc.
+        Since the routers need not to be updated with the endpoint
+        data, this call is just cascaded to the network.
+        """
+* call 3.1.1. self.networks[netid].create_simple_endpoint(ip, host)
+
+### 3.1.1. network.create_simple_endpoint(self, ip, host):
+        """
+        Creates a simple endpoint in the network.
+        1. First create the endpoint object and add it to the set of
+           endpoints
+        2. Call update_endpoint on at least one transit switch of the
+           network (two or three switches may be a good idea in production!).
+        3. Call update on each endpoint's transit agent within the
+           network. The endpoint becomes ready to send  packets.
+        """
+* get the list of transit_switch: switches = list(self.transit_switches.values())
+* create an endpoint object: endpoint(self.vni, self.netid, ip=ip, 
+            prefixlen=self.cidr.prefixlen, gw_ip=self.get_gw_ip(), host=host)
+  * create the transit_agent object
+  * call self.host.provision_simple_endpoint(self):
+    * droplet._create_veth_pair(ep)
+    * droplet.load_transit_agent_xdp(ep.veth_peer)
+  * call 0.2. self.host.update_ep(self)
+* for each transit switch within the subnet:
+  * call 3.1.1.1 switch.update_endpoint(self.endpoints[ip])
+* call 3.1.1.2. self.endpoints[ip].update(self)
+* Question: please confirm the flow as I removed the logic for time measurement
+
+### 3.1.1.1. transit_switch.update_endpoint(self, ep):
+        """
+        Calls an update_endpoint rpc to transit switch's droplet.
+        After this the switch can forward tunneled packets to the
+        endpoint's host. Also calls update_substrate_ep to
+        populate the mac addresses of the endpoint's host.
+        """
+* call 0.2. self.droplet.update_ep(ep)   
+* if ep.host is not None: call 0.1.1.3. self.droplet.update_substrate_ep(ep.host)
+  * ep.host could be None for phantom ep
+
+### 3.1.1.2. endpoint.update(self, net):
+        """
+        Prepares or update the endpoint to send traffic. An endpoint
+        is assumed ready to serve traffic if this function is called once.
+        """
+        if self.host is not None: # call 3.1.1.3.
+            self.transit_agent.update_agent_metadata(self, net)
+* Question: when can the host be None?
+
+### 3.1.1.3. transit_agent.update_agent_metadata(self, ep, net):
+        """
+        Calls update_agent_metadata to update the agents with
+        modifications in net transit switches or endpoint data.
+        1. Update the list of transit switches of the endpoint's
+           network (update_agent_metadata)
+        2. Update the substrate endpoints with the switches mac/ip
+           addresses. This is necessary since the data-plane do not do
+           ARP actively if the mac is missing (at this point).
+        """
+* call 0.3.1 self.droplet.update_agent_metadata(self.veth_peer, ep, net)
+* for each transit switch within the subnet:
+  * call 0.3.2 self.droplet.update_agent_substrate_ep(self.veth_peer, s.droplet)
+
+## 0. droplet class:
 
 ### 0.1.1.1. droplet.update_net(self, net, expect_fail=False):
         """
@@ -146,7 +211,7 @@ This document layout the Mizar programming flow based on https://github.com/futu
         key = ("ep_substrate " + self.phy_itf,
                json.dumps(jsonkey))
         cmd = f'''{self.trn_cli_update_ep} \'{jsonconf}\''''
-        self.do_update_increment( call 0.1.1.3.1.
+        self.do_update_increment( # call 0.1.1.3.1.
             log_string, cmd, expect_fail, key, self.substrate_updates)        
         """
         
@@ -172,5 +237,65 @@ This document layout the Mizar programming flow based on https://github.com/futu
         }
         key = ("vpc " + self.phy_itf, json.dumps(jsonkey))
         cmd = f'''{self.trn_cli_update_vpc} \'{jsonconf}\''''
-        self.do_update_increment( call 1.1.1.3.1.
+        self.do_update_increment( # call 0.1.1.3.1.
             log_string, cmd, expect_fail, key, self.vpc_updates)
+
+### 0.2. droplet.update_ep(self, ep, expect_fail=False):
+        # Only detail veth info if the droplet is also a host
+        # NOTE: control agent doesn't know that.
+        if (ep.host and self.ip == ep.host.ip):
+            peer = ep.get_veth_peer()
+
+        jsonconf = {
+            "tunnel_id": ep.get_tunnel_id(),
+            "ip": ep.get_ip(),
+            "eptype": ep.get_eptype(),
+            "mac": ep.get_mac(),
+            "veth": ep.get_veth_name(),
+            "remote_ips": ep.get_remote_ips(),
+            "hosted_iface": peer
+        }
+        jsonconf = json.dumps(jsonconf)
+        jsonkey = {
+            "tunnel_id": ep.get_tunnel_id(),
+            "ip": ep.get_ip(),
+        }
+        key = ("ep " + self.phy_itf, json.dumps(jsonkey))
+        cmd = f'''{self.trn_cli_update_ep} \'{jsonconf}\''''
+        self.do_update_increment( # call 0.1.1.3.1.
+            log_string, cmd, expect_fail, key, self.endpoint_updates)
+            
+### 0.3.1. droplet.update_agent_metadata(self, itf, ep, net, expect_fail=False):
+        log_string = "[DROPLET {}]: update_agent_metadata on {} for endpoint {}".format(
+            self.id, itf, ep.ip)
+        jsonconf = {
+            "ep": {
+                "tunnel_id": ep.get_tunnel_id(),
+                "ip": ep.get_ip(),
+                "eptype": ep.get_eptype(),
+                "mac": ep.get_mac(),
+                "veth": ep.get_veth_name(),
+                "remote_ips": ep.get_remote_ips(),
+                "hosted_iface": "eth0"
+            },
+            "net": {
+                "tunnel_id": net.get_tunnel_id(),
+                "nip": net.get_nip(),
+                "prefixlen": net.get_prefixlen(),
+                "switches_ips": net.get_switches_ips()
+            },
+            "eth": {
+                "ip": self.ip,
+                "mac": self.mac,
+                "iface": "eth0"
+            }
+        }
+        jsonconf = json.dumps(jsonconf)
+        cmd = f'''{self.trn_cli_update_agent_metadata} -i \'{itf}\' -j \'{jsonconf}\''''
+        self.exec_cli_rpc(log_string, cmd, expect_fail)
+        
+ ### 0.3.2. droplet.update_agent_substrate_ep(self, itf, droplet, expect_fail=False):
+        jsonconf = droplet.get_substrate_ep_json()
+        cmd = f'''{self.trn_cli_update_agent_ep} -i \'{itf}\' -j \'{jsonconf}\''''
+        self.exec_cli_rpc(log_string, cmd, expect_fail)
+ * Question: what does this do when getting the substrate_ep data and reapply on the same droplet?
