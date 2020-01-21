@@ -347,7 +347,6 @@ This document layout the Mizar programming flow based on https://github.com/futu
         jsonconf = droplet.get_substrate_ep_json()
         cmd = f'''{self.trn_cli_update_agent_ep} -i \'{itf}\' -j \'{jsonconf}\''''
         self.exec_cli_rpc(log_string, cmd, expect_fail)
- * Question: what does this do when getting the substrate_ep data and reapply on the same droplet?
 
 
 # What is not included?
