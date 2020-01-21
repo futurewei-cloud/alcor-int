@@ -63,13 +63,14 @@ This document layout the Mizar programming flow based on https://github.com/futu
   * are we calling this for loop too many times after the first 1.2.1. call?
   * if yes, I guess it doesn't hurt a lot to program the same thing multiple times.
 
+
 ## 2. controller.create_network(self, vni, netid, cidr, switches):
         """
         Creates a network in a VPC identified by VNI.
         1. Call create_network in that VPC
         2. For that network, call add_switch for each switch in the list
         """
-* for each switch in the input routers list
+* for each switch in the input switches list
   * call 2.1 self.add_switch(vni, netid, s)
   
 ### 2.1. controller.add_switch(self, vni, netid, s):
@@ -94,7 +95,7 @@ This document layout the Mizar programming flow based on https://github.com/futu
 * create a new transit_switch object: self.networks[netid].add_switch(self, droplet)
 * for each router within the VPC:
   * call 1.1.1. r.update_net(self.networks[netid], droplet)
-
+  
 
 ## 3. controller.create_simple_endpoint(self, vni, netid, ip, host):
 
@@ -299,3 +300,14 @@ This document layout the Mizar programming flow based on https://github.com/futu
         cmd = f'''{self.trn_cli_update_agent_ep} -i \'{itf}\' -j \'{jsonconf}\''''
         self.exec_cli_rpc(log_string, cmd, expect_fail)
  * Question: what does this do when getting the substrate_ep data and reapply on the same droplet?
+
+# More questions:
+* where do we update phantom gateway?
+* how to we move a transit switch/router?
+
+# What is not included?
+* delete_simple_endpoint(self, vni, netid, ip, host):
+* delete_network(self, vni, netid, cidr, switches):
+* delete_vpc(self, vni, cidr, routers):
+* remove_switch(self, vni, netid, s, net=None):
+* remove_router(self, vni, r, vpc=None):
