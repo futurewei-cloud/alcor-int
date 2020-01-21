@@ -70,16 +70,34 @@ This document layout the Mizar programming flow based on https://github.com/futu
         1. Call create_network in that VPC
         2. For that network, call add_switch for each switch in the list
         """
+* call 2.1. self.vpcs[vni].create_network(netid, cidr)
 * for each switch in the input switches list
-  * call 2.1 self.add_switch(vni, netid, s)
+  * call 2.2. self.add_switch(vni, netid, s)
   
-### 2.1. controller.add_switch(self, vni, netid, s):
+### 2.1. vpc.create_network(self, netid, cidr):
+        """
+        Creates a network in the VPC. Since the network does not have
+        transit switches yet, this function just adds a network object
+        to the set of networks.
+        """
+* create a new network object: network(self.vni, netid, cidr)
+* call 2.1.1. self.networks[netid].create_gw_endpoint()
+
+### 2.1.1. network.create_gw_endpoint(self):
+        """
+        Allocates the first IP of the network CIDR range and
+        Creates a phantom endpoint (without a host).
+        """
+* call (see 3.1.1.) self.endpoints[ip] = endpoint(
+       self.vni, self.netid, ip=ip, prefixlen=self.cidr.prefixlen, gw_ip=None, host=None)        
+
+### 2.2. controller.add_switch(self, vni, netid, s):
         """
         Adds a new switch to an existing network.
         """
-* call 2.1.1. self.vpcs[vni].add_switch(netid, switch)
+* call 2.2.1. self.vpcs[vni].create_network(netid, cidr)
 
-### 2.1.1. vpc.add_switch(self, netid, droplet):
+### 2.2.1. vpc.add_switch(self, netid, droplet):
         """
         Adds a switch to the network identified by netid.
         1. Cascade the add switch call to the network, which populate
@@ -92,10 +110,41 @@ This document layout the Mizar programming flow based on https://github.com/futu
            update_net here after the switch is added to the transit
            switches set of the network.
         """
-* create a new transit_switch object: self.networks[netid].add_switch(self, droplet)
+* call 2.2.1.1. self.networks[netid].add_switch(self, droplet)
 * for each router within the VPC:
   * call 1.1.1. r.update_net(self.networks[netid], droplet)
-  
+
+### 2.2.1.1. network.add_switch(self, vpc, droplet):
+        """
+        Adds a transit switch of this network hosted at the given droplet.
+        1. Creates the switch object and add it to the list
+        2. Call update_vpc on the new transit switch's droplet to
+           update it with the list of transit routers of the VPC
+        3. Call update_endpoint on the transit switch's droplet to
+           update it with all endpoint's data within this network
+        4. Finally call update on each endpoint's
+           transit agent within the network, so they can start sending
+           packets to the new transit switch.
+        """
+* create a new transit_switch object: self.transit_switches[id] = transit_switch(droplet)
+* call 2.2.1.1.1. self.transit_switches[id].update_vpc(vpc)
+* for each endpoint in the subnet:
+  * call 3.1.1.1. self.transit_switches[id].update_endpoint(ep)
+  * which should do nothing when there is no endpoint
+* for each endpoint in the subnet:
+  * call 3.1.1.2. transit_switches
+  * which should do nothing when there is no endpoint
+
+### 2.2.1.1.1. transit_switches.update_vpc(self, vpc):
+        """
+        Calls an update_vpc rpc to the transit switch's droplet. After
+        this the switch has an updated list of the VPC's transit
+        routers. Also calls update_substrate_ep to populate the
+        mac addresses of the transit routers' droplets.
+        """
+* call 0.1.1.4. self.droplet.update_vpc(vpc)
+* for each router within the VPC:
+  * call 0.1.1.3. self.droplet.update_substrate_ep(r.droplet)
 
 ## 3. controller.create_simple_endpoint(self, vni, netid, ip, host):
 
@@ -150,7 +199,6 @@ This document layout the Mizar programming flow based on https://github.com/futu
         """
         if self.host is not None: # call 3.1.1.3.
             self.transit_agent.update_agent_metadata(self, net)
-* Question: when can the host be None?
 
 ### 3.1.1.3. transit_agent.update_agent_metadata(self, ep, net):
         """
@@ -301,9 +349,6 @@ This document layout the Mizar programming flow based on https://github.com/futu
         self.exec_cli_rpc(log_string, cmd, expect_fail)
  * Question: what does this do when getting the substrate_ep data and reapply on the same droplet?
 
-# More questions:
-* where do we update phantom gateway?
-* how to we move a transit switch/router?
 
 # What is not included?
 * delete_simple_endpoint(self, vni, netid, ip, host):
@@ -311,3 +356,4 @@ This document layout the Mizar programming flow based on https://github.com/futu
 * delete_vpc(self, vni, cidr, routers):
 * remove_switch(self, vni, netid, s, net=None):
 * remove_router(self, vni, r, vpc=None):
+* how to we move a transit switch/router?
