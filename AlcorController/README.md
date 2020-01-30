@@ -11,8 +11,8 @@ To compile, run, and test Alcor, please follow the following steps:
 
 Clone the Alcor repository.
 ```
-$ git clone https://github.com/futurewei-cloud/alcor.git ~/alcor
-$ cd ~/alcor
+$ git clone https://github.com/futurewei-cloud/mizar-mp.git
+$ cd ~/mizar-mp/AlcorController/
 $ git submodule update --init --recursive
 ```
 
@@ -62,6 +62,6 @@ $ ./scripts/sampeVpcTest.sh localhost 8080
 ```
 
 Next Step:
-- [Install Control Agents](https://github.com/futurewei-cloud/alcor-control-agent/blob/master/src/README.md)
-- [API Document](../docs/apis/index.adoc)
-- [Alcor Design Documents](../docs/visionary_design/table_of_content.adoc)
+- [Install Control Agents](../AlcorControlAgent/src/README.md)
+- [API Document](./docs/apis/index.adoc)
+- [Alcor Design Documents](./docs/visionary_design/table_of_content.adoc)

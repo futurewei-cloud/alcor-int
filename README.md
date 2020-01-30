@@ -1,5 +1,5 @@
 
-#Mizar Management plane
+# Mizar Management plane
 Alcor Hyperscale Cloud Virtual Networking System
 
 * For information about how to use Alcor, visit [Getting Started](AlcorController/README.md)
@@ -42,16 +42,16 @@ Detailed design docs:
 ## Repositories
 The Alcor project includes several directories, each corresponding to standalone component in Alcor.
 
-- [AlcorController](https://github.com/futurewei-cloud/Alcor):
+- [AlcorController](AlcorController):
 This is the main directory for Alcor Regional Controller.
 It hosts controllers' source codes, build and deployment instructions, and various documents that detail the design of Alcor.
 
-- [AlcorControlAgent](https://github.com/futurewei-cloud/AlcorControlAgent):
+- [AlcorControlAgent](AlcorControlAgent):
 This directory contains source codes for a host-level stateless agent that connects regional controllers to the host data-plane component.
 It is responsible for programming on-host data plane with various network configuration for CURD of _VPC, subnet, port, Security group etc._,
  and monitoring network health of containers and VMs on the host.
 
-- Plugins:
+- [Plugins](Plugins):
 This directory contains various plugin to integrate Alcor with different popular orchestration system like Kubernetes.
 We will continue to add new plugin to support integration with other orchestrator, e.g., OpenStack.
 
