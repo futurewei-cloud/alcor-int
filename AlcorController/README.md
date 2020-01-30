@@ -62,6 +62,6 @@ $ ./scripts/sampeVpcTest.sh localhost 8080
 ```
 
 Next Step:
-- [Install Control Agents](https://github.com/futurewei-cloud/alcor-control-agent/blob/master/src/README.md)
+- [Install Control Agents](../AlcorControlAgent/src/README.md)
 - [API Document](../docs/apis/index.adoc)
 - [Alcor Design Documents](../docs/visionary_design/table_of_content.adoc)
