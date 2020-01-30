@@ -17,7 +17,7 @@
 * Deployment, Upgrade and Compatibility
 
 ### Development
-* xref:../../src/README.md[Getting Started]
+* xref:../../README.md[Getting Started]
 
 ### Test
 * xref:../test/e2eTestSetup.adoc[E2E Test Setup 1]
