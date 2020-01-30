@@ -63,5 +63,5 @@ $ ./scripts/sampeVpcTest.sh localhost 8080
 
 Next Step:
 - [Install Control Agents](../AlcorControlAgent/src/README.md)
-- [API Document](../docs/apis/index.adoc)
-- [Alcor Design Documents](../docs/visionary_design/table_of_content.adoc)
+- [API Document](./docs/apis/index.adoc)
+- [Alcor Design Documents](./docs/visionary_design/table_of_content.adoc)
