@@ -1,2 +1,0 @@
-# MizarMP
-Mizar Management plane
