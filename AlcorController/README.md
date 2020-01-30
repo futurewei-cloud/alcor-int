@@ -11,8 +11,8 @@ To compile, run, and test Alcor, please follow the following steps:
 
 Clone the Alcor repository.
 ```
-$ git clone https://github.com/futurewei-cloud/alcor.git ~/alcor
-$ cd ~/alcor
+$ git clone https://github.com/futurewei-cloud/mizar-mp.git
+$ cd ~/mizar-mp/AlcorController/
 $ git submodule update --init --recursive
 ```
 
