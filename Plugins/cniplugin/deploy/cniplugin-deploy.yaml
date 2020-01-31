@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mizarmp-cniplugin-deploy
+  namespace: kube-system
+spec:
+  selector:
+      matchLabels:
+        name: mizarmp-cniplugin-deploy
+  template:
+    metadata:
+        labels:
+          name: mizarmp-cniplugin-deploy
+    spec:
+      tolerations:
+      - key: node.kubernetes.io/network-unavailable
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: cniplugin-deploy 
+        image: arktosstaging/mizarmp-cniplugin-deploy:0.1.0
+        imagePullPolicy: Always
+        command: [ "sh", "/mizarmp-cniplugin-deploy.sh" ]
+        volumeMounts:
+        - name: cni-conf
+          mountPath: /etc/cni/net.d
+        - name: cni-bin
+          mountPath: /opt/cni/bin/
+        - name: mizarmp-vars 
+          mountPath: /etc/mizarmp/
+      volumes:
+        - name: cni-conf
+          hostPath:
+            path: /etc/cni/net.d/
+            type: DirectoryOrCreate
+        - name: cni-bin
+          hostPath:
+            path: /opt/cni/bin/
+            type: DirectoryOrCreate
+        - name: mizarmp-vars
+          hostPath:
+            path: /etc/mizarmp
