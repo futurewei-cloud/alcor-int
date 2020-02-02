@@ -1,8 +1,0 @@
-[submodule "AliothController"]
-	path = controlagent/AliothController
-	url = https://github.com/futurewei-cloud/AliothController.git
-	ignore = untracked
-[submodule "Transit"]
-	path = controlagent/Transit
-	url = https://github.com/futurewei-cloud/Transit.git
-	ignore = untracked

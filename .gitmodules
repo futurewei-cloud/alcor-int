@@ -6,3 +6,7 @@
 	path = alcor
 	url = https://github.com/futurewei-cloud/alcor
     ignore = untracked
+[submodule "AlcorControlAgent/mizar"]
+	path = AlcorControlAgent/mizar
+	url = https://github.com/futurewei-cloud/mizar.git
+	branch = master
