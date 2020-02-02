@@ -63,10 +63,15 @@ dkms.conf
 **/CMakeScripts
 **/compile_commands.json
 
+# python
+*.swp
+__pycache__
+
 # Other files to ignore
 .vscode/
 cppkafka/
-networkControlAgent
-aca_func_tests
+.DS_Store
+gs_tests
+aca_tests
 *.pb.h
 *.pb.cc
