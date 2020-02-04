@@ -3,7 +3,7 @@
 # Build alcor-control-agent project
 
 # Create and Start the build contrainer
-docker build -t aca_build0 .
+docker build -f AlcorControlAgent/build/Dockerfile -t aca_build0 .
 docker create -v $(pwd):/mnt/host/code -it --privileged --cap-add=NET_ADMIN --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --name a1 aca_build0:latest /bin/bash
 docker start a1
 
