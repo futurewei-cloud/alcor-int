@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Build alcor-control-agent project
+# Initialize the needed mizar submodule
+git submodule update --init --recursive
 
 # Create and Start the build contrainer
 docker build -f AlcorControlAgent/build/Dockerfile -t aca_build0 .
