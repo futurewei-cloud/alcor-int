@@ -1,6 +1,10 @@
-name: Java CI
+name: Controller Maven CI
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'AlcorController/**'
+      - '!AlcorController/docs/**'
 
 jobs:
   build:
