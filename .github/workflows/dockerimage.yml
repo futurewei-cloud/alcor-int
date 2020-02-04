@@ -1,6 +1,10 @@
 name: Controller Docker Image CI
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'AlcorController/**'
+      - '!AlcorController/docs/**'
 
 jobs:
 
@@ -10,9 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Go to the project directory
-      run: cd AlcorController
     - name: Build Alcor controller
-      run: ./AlcorController/scripts/build.sh
+      run: ./scripts/build.sh
+      working-directory: ./AlcorController
     - name: Build docker image for Alcor Controller
       run: docker build . --file AlcorController/Dockerfile --tag alcor_controller:$(date +%s)
+      working-directory: ./AlcorController
