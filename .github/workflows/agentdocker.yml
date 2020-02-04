@@ -1,0 +1,19 @@
+name: Agent Build CI
+
+on:
+  push:
+    paths:
+      - 'AlcorControlAgent/**'
+      - '!AlcorControlAgent/docs/**'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Alcor Control Agent
+      run: ./AlcorControlAgent/build/build.sh
+      working-directory: .
