@@ -11,5 +11,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build Alcor Control Agent
-      run: ./build.sh
-      working-directory: ./AlcorControlAgent/build
+      run: ./AlcorControlAgent/build/build.sh
+      working-directory: .
