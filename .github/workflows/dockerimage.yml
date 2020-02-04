@@ -2,7 +2,6 @@ name: Controller Docker Image CI
 
 on: [push]
 
-
 jobs:
 
   build:
@@ -15,5 +14,5 @@ jobs:
       run: ./scripts/build.sh
       working-directory: ./AlcorController
     - name: Build docker image for Alcor Controller
-      run: docker build . --file AlcorController/Dockerfile --tag alcor_controller:$(date +%s)
+      run: docker build . --file Dockerfile --tag alcor_controller:$(date +%s)
       working-directory: ./AlcorController
