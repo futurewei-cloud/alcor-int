@@ -1,0 +1,476 @@
+replicaCount: 1
+
+image:
+  repository: netdata/netdata
+  tag: v1.19.0
+  pullPolicy: Always
+
+sysctlImage:
+  enabled: false
+  repository: alpine
+  tag: latest
+  pullPolicy: Always
+  command: []
+
+service:
+  type: ClusterIP
+  port: 19999
+  # Use a static loadBalancerIP. Only to be used with type LoadBalancer
+  # loadBalancerIP: 10.0.1.69
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - netdata.k8s.local
+#  tls:
+#    - secretName: netdata-tls
+#      hosts:
+#        - netdata.k8s.local
+
+rbac:
+  create: true
+  pspEnabled: true
+  
+serviceAccount:
+  create: true
+  name: netdata
+
+
+master:
+  resources: {}
+    # limits:
+    #  cpu: 4
+    #  memory: 4096Mi
+    # requests:
+    #  cpu: 4
+    #  memory: 4096Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  env: {}
+    # To disable anonymous statistics:
+    # DO_NOT_TRACK: 1
+
+  podLabels: {}
+
+  podAnnotations: {}
+
+  database:
+    persistence: true
+    # Set '-' as the storageclass to get a volume from the default storage class.
+    storageclass: "-"
+    volumesize: 2Gi
+
+  alarms:
+    persistence: true
+    # Set '-' as the storageclass to get a volume from the default storage class.
+    storageclass: "-"
+    volumesize: 100Mi
+
+  configs:
+    stream:
+      enabled: true
+      path: /etc/netdata/stream.conf
+      data: |
+        [11111111-2222-3333-4444-555555555555]
+          enabled = yes
+          history = 3600
+          default memory mode = save
+          health enabled by default = auto
+          allow from = *
+    netdata:
+      enabled: true
+      path: /etc/netdata/netdata.conf
+      data: |
+        [global]
+          memory mode = save
+          bind to = 0.0.0.0:19999
+        [plugins]
+          cgroups = no
+          tc = no
+          enable running new plugins = no
+          check for new plugins every = 72000
+          python.d = no
+          charts.d = no
+          go.d = no
+          node.d = no
+          apps = no
+          proc = no
+          idlejitter = no
+          diskspace = no
+    health:
+      enabled: true
+      path: /etc/netdata/health_alarm_notify.conf
+      data: |
+        SEND_EMAIL="NO"
+        SEND_SLACK="YES"
+        SLACK_WEBHOOK_URL=""
+        DEFAULT_RECIPIENT_SLACK=""
+        role_recipients_slack[sysadmin]="${DEFAULT_RECIPIENT_SLACK}"
+        role_recipients_slack[domainadmin]="${DEFAULT_RECIPIENT_SLACK}"
+        role_recipients_slack[dba]="${DEFAULT_RECIPIENT_SLACK}"
+        role_recipients_slack[webmaster]="${DEFAULT_RECIPIENT_SLACK}"
+        role_recipients_slack[proxyadmin]="${DEFAULT_RECIPIENT_SLACK}"
+        role_recipients_slack[sitemgr]="${DEFAULT_RECIPIENT_SLACK}"
+    agents:
+      enabled: true
+      path: /etc/netdata/health.d/apps_groups.conf
+      data: |
+        alarm: AlcorControlAgent_running
+        on: apps.processes
+        lookup: min -1s unaligned of AlcorControlAgent
+        units: processes
+        every: 1s
+        warn: $this == nan
+        crit: $this == nan
+        info: check if AlcorControlAgent is running
+        delay: down 5m multiplier 1.5 max 1h
+        to: sysadmin
+
+        alarm: transitd_running
+        on: apps.processes
+        lookup: min -1s unaligned of transitd
+        units: processes
+        every: 1s
+        warn: $this == nan
+        crit: $this == nan
+        info: check if transitd is running
+        delay: down 5m multiplier 1.5 max 1h
+        to: sysadmin
+
+slave:
+  enabled: true
+  resources: {}
+    # limits:
+    #  cpu: 4
+    #  memory: 4096Mi
+    # requests:
+    #  cpu: 4
+    #  memory: 4096Mi
+
+  nodeSelector: {}
+
+  tolerations:
+    - operator: Exists
+      effect: NoSchedule
+
+  affinity: {}
+
+  podLabels: {}
+
+  podAnnotationAppArmor:
+    enabled: true
+
+  podAnnotations: {}
+
+  configs:
+    netdata:
+      enabled: true
+      path: /etc/netdata/netdata.conf
+      data: |
+        [global]
+          memory mode = none
+        [health]
+          enabled = no
+    stream:
+      enabled: true
+      path: /etc/netdata/stream.conf
+      data: |
+        [stream]
+          enabled = yes
+          destination = netdata:19999
+          api key = 11111111-2222-3333-4444-555555555555
+          timeout seconds = 60
+          buffer size bytes = 1048576
+          reconnect delay seconds = 5
+          initial clock resync iterations = 60
+    coredns:
+      enabled: true
+      path: /etc/netdata/go.d/coredns.conf
+      data: |
+        update_every: 1
+        autodetection_retry: 0
+        jobs:
+          - url: http://127.0.0.1:9153/metrics
+          - url: http://kube-dns.kube-system.svc.cluster.local:9153/metrics
+    kubelet:
+      enabled: true
+      path: /etc/netdata/go.d/k8s_kubelet.conf
+      data: |
+        update_every: 1
+        autodetection_retry: 0
+        jobs:
+          - url: http://127.0.0.1:10255/metrics
+          - url: https://localhost:10250/metrics
+            tls_skip_verify: yes
+    kubeproxy:
+      enabled: true
+      path: /etc/netdata/go.d/k8s_kubeproxy.conf
+      data: |
+        update_every: 1
+        autodetection_retry: 0
+        jobs:
+          - url: http://127.0.0.1:10249/metrics
+
+    apps_groups:
+      enabled: true
+      path: /etc/netdata/apps_groups.conf
+      data: |
+        # -----------------------------------------------------------------------------
+        # NETDATA processes accounting
+
+        # netdata main process
+        netdata: netdata
+
+        # netdata known plugins
+        # plugins not defined here will be accumulated in netdata, above
+        apps.plugin: apps.plugin
+        freeipmi.plugin: freeipmi.plugin
+        nfacct.plugin: nfacct.plugin
+        cups.plugin: cups.plugin
+        xenstat.plugin: xenstat.plugin
+        perf.plugin: perf.plugin
+        charts.d.plugin: *charts.d.plugin*
+        node.d.plugin: *node.d.plugin*
+        python.d.plugin: *python.d.plugin*
+        tc-qos-helper: *tc-qos-helper.sh*
+        fping: fping
+        ioping: ioping
+        go.d.plugin: *go.d.plugin*
+        slabinfo.plugin: slabinfo.plugin
+
+        # -----------------------------------------------------------------------------
+        # authentication/authorization related servers
+
+        auth: radius* openldap* ldap* slapd
+        fail2ban: fail2ban*
+
+        # -----------------------------------------------------------------------------
+        # web/ftp servers
+
+        httpd: apache* httpd nginx* lighttpd
+        proxy: squid* c-icap squidGuard varnish*
+        php: php*
+        ftpd: proftpd in.tftpd vsftpd
+        uwsgi: uwsgi
+        unicorn: *unicorn*
+        puma: *puma*
+
+        # -----------------------------------------------------------------------------
+        # database servers
+
+        sql: mysqld* mariad* postgres* postmaster* oracle_* ora_*
+        nosql: mongod redis* memcached *couchdb*
+        timedb: prometheus *carbon-cache.py* *carbon-aggregator.py* *graphite/manage.py* *net.opentsdb.tools.TSDMain*
+
+        # -----------------------------------------------------------------------------
+        # email servers
+
+        email: dovecot imapd pop3d amavis* master zmstat* zmmailboxdmgr qmgr oqmgr saslauthd opendkim clamd freshclam unbound tlsmgr postfwd2 postscreen postfix smtp* lmtp* sendmai
+        l
+
+        # -----------------------------------------------------------------------------
+        # network, routing, VPN
+
+        ppp: ppp*
+        vpn: openvpn pptp* cjdroute gvpe tincd
+        wifi: hostapd wpa_supplicant NetworkManager
+        routing: ospfd* ospf6d* bgpd bfdd fabricd isisd eigrpd sharpd staticd ripd ripngd pimd pbrd nhrpd ldpd zebra vrrpd vtysh bird*
+        modem: ModemManager
+        tor: tor
+
+        # -----------------------------------------------------------------------------
+        # high availability and balancers
+
+        camo: *camo*
+        balancer: ipvs_* haproxy
+        ha: corosync hs_logd ha_logd stonithd pacemakerd lrmd crmd
+
+        # -----------------------------------------------------------------------------
+        # telephony
+
+        pbx: asterisk safe_asterisk *vicidial*
+        sip: opensips* stund
+
+        # -----------------------------------------------------------------------------
+        # chat
+
+        chat: irssi *vines* *prosody* murmurd
+
+        # -----------------------------------------------------------------------------
+        # monitoring
+
+        logs: ulogd* syslog* rsyslog* logrotate systemd-journald rotatelogs
+        nms: snmpd vnstatd smokeping zabbix* monit munin* mon openhpid watchdog tailon nrpe
+        splunk: splunkd
+        azure: mdsd *waagent* *omiserver* *omiagent* hv_kvp_daemon hv_vss_daemon *auoms* *omsagent*
+
+        # -----------------------------------------------------------------------------
+        # storage, file systems and file servers
+
+        ceph: ceph-mds ceph-mgr ceph-mon ceph-osd radosgw* rbd-*
+        samba: smbd nmbd winbindd
+        nfs: rpcbind rpc.* nfs*
+        zfs: spl_* z_* txg_* zil_* arc_* l2arc*
+        btrfs: btrfs*
+        iscsi: iscsid iscsi_eh
+
+        # -----------------------------------------------------------------------------
+        # kubernetes
+
+        kubelet: kubelet
+        kube-dns: kube-dns
+        kube-proxy: kube-proxy
+        metrics-server: metrics-server
+        heapster: heapster
+        control-agent: AlcorControlAgent
+        transitd: transitd
+
+        # -----------------------------------------------------------------------------
+        # containers & virtual machines
+
+        containers: lxc* docker* balena*
+        VMs: vbox* VBox* qemu*
+
+        # -----------------------------------------------------------------------------
+        # ssh servers and clients
+
+        ssh: ssh* scp dropbear
+
+        # -----------------------------------------------------------------------------
+        # print servers and clients
+
+        print: cups* lpd lpq
+
+        # -----------------------------------------------------------------------------
+        # time servers and clients
+
+        time: ntp* systemd-timesyn* chronyd
+
+        # -----------------------------------------------------------------------------
+        # dhcp servers and clients
+
+        dhcp: *dhcp*
+
+        # -----------------------------------------------------------------------------
+        # name servers and clients
+
+        named: named rncd dig
+        dnsdist: dnsdist
+
+        # -----------------------------------------------------------------------------
+        # installation / compilation / debugging
+
+        build: cc1 cc1plus as gcc* cppcheck ld make cmake automake autoconf autoreconf
+        build: git gdb valgrind*
+
+        # -----------------------------------------------------------------------------
+        # antivirus
+
+        antivirus: clam* *clam
+
+        # -----------------------------------------------------------------------------
+        # torrent clients
+
+        torrents: *deluge* transmission* *SickBeard* *CouchPotato* *rtorrent*
+
+        # -----------------------------------------------------------------------------
+        # backup servers and clients
+
+        backup: rsync bacula*
+
+        # -----------------------------------------------------------------------------
+        # cron
+
+        cron: cron* atd anacron systemd-cron*
+
+        # -----------------------------------------------------------------------------
+        # UPS
+
+        ups: upsmon upsd */nut/*
+
+        # -----------------------------------------------------------------------------
+        # media players, servers, clients
+
+        media: mplayer vlc xine mediatomb omxplayer* kodi* xbmc* mediacenter eventlircd
+        media: mpd minidlnad mt-daapd avahi* Plex*
+
+        # -----------------------------------------------------------------------------
+        # java applications
+
+        hdfsdatanode: *org.apache.hadoop.hdfs.server.datanode.DataNode*
+        hdfsnamenode: *org.apache.hadoop.hdfs.server.namenode.NameNode*
+        hdfsjournalnode: *org.apache.hadoop.hdfs.qjournal.server.JournalNode*
+        hdfszkfc: *org.apache.hadoop.hdfs.tools.DFSZKFailoverController*
+
+        yarnnode: *org.apache.hadoop.yarn.server.nodemanager.NodeManager*
+        yarnmgr: *org.apache.hadoop.yarn.server.resourcemanager.ResourceManager*
+        yarnproxy: *org.apache.hadoop.yarn.server.webproxy.WebAppProxyServer*
+
+        sparkworker: *org.apache.spark.deploy.worker.Worker*
+        sparkmaster: *org.apache.spark.deploy.master.Master*
+
+        hbaseregion: *org.apache.hadoop.hbase.regionserver.HRegionServer*
+        hbaserest: *org.apache.hadoop.hbase.rest.RESTServer*
+        hbasethrift: *org.apache.hadoop.hbase.thrift.ThriftServer*
+        hbasemaster: *org.apache.hadoop.hbase.master.HMaster*
+
+        zookeeper: *org.apache.zookeeper.server.quorum.QuorumPeerMain*
+
+        hive2: *org.apache.hive.service.server.HiveServer2*
+        hivemetastore: *org.apache.hadoop.hive.metastore.HiveMetaStore*
+
+        solr: *solr.install.dir*
+
+        airflow: *airflow*
+
+        # -----------------------------------------------------------------------------
+        # X
+
+        X: X Xorg xinit lightdm xdm pulseaudio gkrellm xfwm4 xfdesktop xfce* Thunar
+        X: xfsettingsd xfconfd gnome-* gdm gconf* dconf* xfconf* *gvfs gvfs* slim
+        X: kdeinit* kdm plasmashell
+        X: evolution-* firefox chromium opera vivaldi-bin epiphany WebKit*
+        X: '*systemd --user*' chrome *chrome-sandbox* *google-chrome* *chromium* *firefox*
+
+        # -----------------------------------------------------------------------------
+        # Kernel / System
+
+        ksmd: ksmd
+
+        system: systemd-* udisks* udevd* *udevd connmand ipv6_addrconf dbus-* rtkit*
+        system: inetd xinetd mdadm polkitd acpid uuidd packagekitd upowerd colord
+        system: accounts-daemon rngd haveged
+
+        kernel: kthreadd kauditd lockd khelper kdevtmpfs khungtaskd rpciod
+        kernel: fsnotify_mark kthrotld deferwq scsi_*
+
+        # -----------------------------------------------------------------------------
+        # other application servers
+
+        kafka: *kafka.Kafka*
+          
+        rabbitmq: *rabbitmq*
+          
+        sidekiq: *sidekiq*
+        java: java
+        ipfs: ipfs
+          
+        node: node*
+        factorio: factorio
+          
+        p4: p4*
+          
+        git-services: gitea gitlab-runner
+
+  env: {}
+    # To disable anonymous statistics:
+    #DO_NOT_TRACK: 1
