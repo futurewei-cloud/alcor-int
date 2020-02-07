@@ -3,7 +3,7 @@
 ### Design
 
 * High Level Design
-* Goal State Data Model
+* xref:goal_state_model.adoc[Goal State Data Model]
 * Key System Flows
 * Alcor Controller Subsystem Design
 * xref:data_store.adoc[Data Store Subsystem Design]
