@@ -86,7 +86,7 @@ It is responsible for programming on-host data plane with various network config
 
 - [Plugins](Plugins):
 This directory contains various plugin to integrate Alcor with different popular orchestration system like Kubernetes.
-We will continue to add new plugin to support integration with other orchestration system, e.g., OpenStack.
+We will continue to add new plugin to support integration with other orchestration systems, e.g., OpenStack.
 
 As a reference, Alcor supports a high performance cloud data plane [Mizar](https://github.com/futurewei-cloud/Mizar),
 which is a complementary project of Alcor.
