@@ -1,6 +1,5 @@
-
 # Mizar Management plane
-Alcor Hyperscale Cloud Virtual Networking System
+Alcor Hyperscale Cloud Native Control Plane
 
 * For information about how to use Alcor, visit [Getting Started](AlcorController/README.md)
 * To ask questions, raise feature requests and get assistance from our community, visit [Issues page](https://github.com/futurewei-cloud/mizar-mp/issues)
@@ -11,6 +10,7 @@ shows how to use Mizar-MP for Kubernetes container network provisioning.
 In this README:
 
 - [Introduction](#introduction)
+- [Key Features](#Key Features)
 - [Repositories](#repositories)
 
 ## Introduction
@@ -41,6 +41,37 @@ Detailed design docs:
 - [Alcor regional controllers](AlcorController/docs/visionary_design/controller.adoc)
 - [Alcor control agent](AlcorControlAgent/docs/design.adoc)
 
+## Key Features
+
+### Cloud-Native Architecture
+Alcor leverages Kubernetes and Istio to build its distributed _micro-services_ architecture.
+Depending on the control plane load, Alcor Controller scales out with multiple instances and each instance is a Kubernetes application.
+One step further, each application contains various infrastructure microservices to manage different types of network resources.
+
+### Throughput-Optimal Design
+Alcor focuses on top-down throughput optimization on every system layer including API, Controller, messaging mechanism,
+and host agent.
+For example,
+a batch API is provided to support deploying a group of ports with a single POST call, and
+a message batching mechanism is proposed on a per-host basis, which is capable of driving groups (potentially thousands)
+of resources to the same host in one shot.
+
+### Fast Resource Provisioning
+To support time-critical applications, Alcor enables a direct communication channel from Controller to Host Agent.
+This channel bypasses a message queueing system like Kafka, and utilizes gRPC to offer 10x latency improvement compared to Kafka.
+
+<!-- ### Large-Scale Network Resource Management-->
+<!-- ### Unified Management for VM and Containers-->
+
+### Planned Features
+
+The planned features are listed in our current roadmap:
+1. Major VPC features (e.g., security group, ACL, QoS)
+2. Intelligent network function placement and auto-scaling
+3. Compatibility with OVS
+4. Controller Grey release
+5. New resource tagging framework, and many more...
+
 ## Repositories
 The Alcor project includes several directories, each corresponding to standalone component in Alcor.
 
@@ -55,7 +86,7 @@ It is responsible for programming on-host data plane with various network config
 
 - [Plugins](Plugins):
 This directory contains various plugin to integrate Alcor with different popular orchestration system like Kubernetes.
-We will continue to add new plugin to support integration with other orchestrator, e.g., OpenStack.
+We will continue to add new plugin to support integration with other orchestration system, e.g., OpenStack.
 
 As a reference, Alcor supports a high performance cloud data plane [Mizar](https://github.com/futurewei-cloud/Mizar),
 which is a complementary project of Alcor.
