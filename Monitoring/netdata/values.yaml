@@ -331,8 +331,8 @@ slave:
         kube-proxy: kube-proxy
         metrics-server: metrics-server
         heapster: heapster
-        controller: *AlcorController*
-        control-agent: AlcorControlAgent
+        AlcorController: *AlcorController*
+        AlcorControlAgent: AlcorControlAgent
         transitd: transitd
 
         # -----------------------------------------------------------------------------
