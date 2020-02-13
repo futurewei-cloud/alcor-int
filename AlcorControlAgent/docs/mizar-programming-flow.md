@@ -59,9 +59,6 @@ This document layout the Mizar programming flow based on https://github.com/futu
 * call 0.1.1.4. self.droplet.update_vpc(vpc)
 * for each transit router in the VPC:
   * call 0.1.1.3. self.droplet.update_substrate_ep(r.droplet)
-  * question: since we can going through all the transit switches in 1.2.1., 
-  * are we calling this for loop too many times after the first 1.2.1. call?
-  * if yes, I guess it doesn't hurt a lot to program the same thing multiple times.
 
 
 ## 2. controller.create_network(self, vni, netid, cidr, switches):
@@ -132,7 +129,7 @@ This document layout the Mizar programming flow based on https://github.com/futu
   * call 3.1.1.1. self.transit_switches[id].update_endpoint(ep)
   * which should do nothing when there is no endpoint
 * for each endpoint in the subnet:
-  * call 3.1.1.2. transit_switches
+  * call 3.1.1.2. transit_switches.update(self, net):
   * which should do nothing when there is no endpoint
 
 ### 2.2.1.1.1. transit_switches.update_vpc(self, vpc):
