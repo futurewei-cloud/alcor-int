@@ -1,4 +1,8 @@
-[submodule "AlcorControlAgent/mizar"]
-	path = AlcorControlAgent/mizar
-	url = https://github.com/futurewei-cloud/mizar.git
+[submodule "AlcorController"]
+	path = AlcorController
+	url = https://github.com/futurewei-cloud/alcor.git
+	ignore = untracked
+[submodule "AlcorControlAgent"]
+	path = AlcorControlAgent
+	url = https://github.com/futurewei-cloud/alcor-control-agent.git
     ignore = untracked

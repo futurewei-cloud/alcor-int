@@ -1,6 +1,0 @@
-INCLUDE(FindProtobuf)
-FIND_PACKAGE(Protobuf REQUIRED)
-INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
-file(GLOB ProtoFiles "${CMAKE_CURRENT_SOURCE_DIR}/../../../AlcorController/src/schema/proto3/*.proto")
-PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
-ADD_LIBRARY(proto ${ProtoHeaders} ${ProtoSources})
