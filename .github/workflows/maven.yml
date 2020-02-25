@@ -3,8 +3,9 @@ name: Controller Maven CI
 on:
   push:
     paths:
-      - 'AlcorController/**'
-      - '!AlcorController/docs/**'
+      - '**'
+      - '!Monitoring/**'
+      - '!Plugins/**'
 
 jobs:
   build:
