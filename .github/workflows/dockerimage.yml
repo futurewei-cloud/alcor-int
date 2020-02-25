@@ -3,8 +3,9 @@ name: Controller Docker Image CI
 on:
   push:
     paths:
-      - 'AlcorController/**'
-      - '!AlcorController/docs/**'
+      - '**'
+      - '!Monitoring/**'
+      - '!Plugins/**'
 
 jobs:
 
