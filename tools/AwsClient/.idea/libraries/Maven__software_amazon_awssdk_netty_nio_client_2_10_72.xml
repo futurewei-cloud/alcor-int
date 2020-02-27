@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: software.amazon.awssdk:netty-nio-client:2.10.72">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awssdk/netty-nio-client/2.10.72/netty-nio-client-2.10.72.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awssdk/netty-nio-client/2.10.72/netty-nio-client-2.10.72-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awssdk/netty-nio-client/2.10.72/netty-nio-client-2.10.72-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="1c23cc90-38d0-4145-adf4-f28b4cfcd643" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="88" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1YJTKaGae8V5fC5A88x3MvxDlCJ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.project.maven.runner" />
+  </component>
+  <component name="RunManager" selected="Application.AwsClient">
+    <configuration name="AwsClient" type="Application" factoryName="Application" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="main.java.AwsClient" />
+      <module name="AwsClient" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="main.java.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AwsClient-1.0-SNAPSHOT.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/target/AwsClient-1.0-SNAPSHOT.jar" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="/usr/lib/jvm/java-8-openjdk-amd64/jre" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JarApplication">
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="/usr/lib/jvm/java-8-openjdk-amd64/jre" />
+      <method v="2" />
+    </configuration>
+    <configuration name="AwsClient []" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list />
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="true" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list />
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Application.AwsClient" />
+      <item itemvalue="Maven.AwsClient []" />
+      <item itemvalue="JAR Application.AwsClient-1.0-SNAPSHOT.jar" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.AwsClient" />
+        <item itemvalue="JAR Application.AwsClient-1.0-SNAPSHOT.jar" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1c23cc90-38d0-4145-adf4-f28b4cfcd643" name="Default Changelist" comment="" />
+      <created>1582659633248</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1582659633248</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="654" y="212" width="676" height="713" key="#AwsClient" timestamp="1582775301466">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="654" y="212" width="676" height="713" key="#AwsClient/67.27.1853.1173@67.27.1853.1173" timestamp="1582775301466" />
+    <state x="592" y="230" width="800" height="677" key="#Project_Structure" timestamp="1582741288746">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="592" y="230" width="800" height="677" key="#Project_Structure/67.27.1853.1173@67.27.1853.1173" timestamp="1582741288746" />
+    <state x="455" y="259" width="1084" height="785" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1582742945202">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="455" y="259" width="1084" height="785" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1173@67.27.1853.1173" timestamp="1582742945202" />
+    <state x="781" y="311" width="580" height="661" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1582659649186">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="781" y="311" width="580" height="661" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/67.27.1853.1173@67.27.1853.1173" timestamp="1582659649186" />
+    <state x="1000" y="291" width="424" height="567" key="FileChooserDialogImpl" timestamp="1582685074867">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="1000" y="291" width="424" height="567" key="FileChooserDialogImpl/67.27.1853.1173@67.27.1853.1173" timestamp="1582685074867" />
+    <state width="1657" height="246" key="GridCell.Tab.0.bottom" timestamp="1582775022652">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1657" height="246" key="GridCell.Tab.0.bottom/67.27.1853.1173@67.27.1853.1173" timestamp="1582775022652" />
+    <state width="1657" height="246" key="GridCell.Tab.0.center" timestamp="1582775022652">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1657" height="246" key="GridCell.Tab.0.center/67.27.1853.1173@67.27.1853.1173" timestamp="1582775022652" />
+    <state width="1657" height="246" key="GridCell.Tab.0.left" timestamp="1582775022652">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1657" height="246" key="GridCell.Tab.0.left/67.27.1853.1173@67.27.1853.1173" timestamp="1582775022652" />
+    <state width="1657" height="246" key="GridCell.Tab.0.right" timestamp="1582775022652">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1657" height="246" key="GridCell.Tab.0.right/67.27.1853.1173@67.27.1853.1173" timestamp="1582775022652" />
+    <state width="1354" height="375" key="GridCell.Tab.1.bottom" timestamp="1582747510463">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1354" height="375" key="GridCell.Tab.1.bottom/67.27.1853.1173@67.27.1853.1173" timestamp="1582747510463" />
+    <state width="1354" height="375" key="GridCell.Tab.1.center" timestamp="1582747510462">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1354" height="375" key="GridCell.Tab.1.center/67.27.1853.1173@67.27.1853.1173" timestamp="1582747510462" />
+    <state width="1354" height="375" key="GridCell.Tab.1.left" timestamp="1582747510462">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1354" height="375" key="GridCell.Tab.1.left/67.27.1853.1173@67.27.1853.1173" timestamp="1582747510462" />
+    <state width="1354" height="375" key="GridCell.Tab.1.right" timestamp="1582747510463">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state width="1354" height="375" key="GridCell.Tab.1.right/67.27.1853.1173@67.27.1853.1173" timestamp="1582747510463" />
+    <state x="580" y="305" width="824" height="526" key="IDE.errors.dialog" timestamp="1582741601184">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="580" y="305" width="824" height="526" key="IDE.errors.dialog/67.27.1853.1173@67.27.1853.1173" timestamp="1582741601184" />
+    <state x="526" y="271" width="924" height="684" key="Maven.ArtifactSearchDialog" timestamp="1582763064953">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="526" y="271" width="924" height="684" key="Maven.ArtifactSearchDialog/67.27.1853.1173@67.27.1853.1173" timestamp="1582763064953" />
+    <state x="803" y="229" width="819" height="691" key="NewModule_or_Project.wizard" timestamp="1582668579853">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="803" y="229" width="819" height="691" key="NewModule_or_Project.wizard/67.27.1853.1173@67.27.1853.1173" timestamp="1582668579853" />
+    <state x="486" y="176" key="SettingsEditor" timestamp="1582773030801">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="486" y="176" key="SettingsEditor/67.27.1853.1173@67.27.1853.1173" timestamp="1582773030801" />
+    <state x="653" y="369" key="com.intellij.ide.util.TipDialog" timestamp="1582693733077">
+      <screen x="67" y="27" width="1853" height="1173" />
+    </state>
+    <state x="653" y="369" key="com.intellij.ide.util.TipDialog/67.27.1853.1173@67.27.1853.1173" timestamp="1582693733077" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/AwsClient$.ic" NAME=" Coverage Results" MODIFIED="1582772190212" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/AwsClient$AwsClient.ic" NAME="AwsClient Coverage Results" MODIFIED="1582742020065" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>main.java.*</FILTER>
+    </SUITE>
+  </component>
+</project>
