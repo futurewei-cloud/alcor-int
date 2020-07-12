@@ -3,13 +3,17 @@
   "consumerThreadNumber": "3",
   "topicNumberPerThread": "3",
   "producerUrl": [
-    "pulsar://192.168.1.105:6650"
+    "pulsar://host1:6650",
+    "pulsar://host2:6650",
+    "pulsar://host3:6650"
   ],
-  "consumerUrl": "pulsar://192.168.1.105:6650",
+  "consumerUrl": "pulsar://hots1:6650,hots2:6650,hots3:6650",
   "adminUrl": [
-    "http://192.168.1.105:8080"
+    "http://host1:8080",
+    "http://host2:8080",
+    "http://host3:8080"
   ],
   "payload-size": "1024",
-  "statsFolderName": "results/standalone",
+  "statsFolderName": "results/3broker",
   "enableTopicStats": "false"
 }

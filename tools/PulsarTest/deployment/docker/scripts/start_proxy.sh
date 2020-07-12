@@ -1,2 +1,2 @@
 #!/bin/bash
-bin/pulsar proxy > logs/proxy.log 2>&1
+nohup bin/pulsar proxy > logs/proxy.log 2>&1

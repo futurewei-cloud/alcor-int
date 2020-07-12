@@ -1,6 +1,6 @@
-### Deployment
+## Deployment
 
-#### Deploy with Docker
+### Deploy with Docker
 
 Start cluster with 3 brokers and 3 bookies.
 
@@ -15,65 +15,108 @@ cd deployment/docker
 ./down.sh
 ```
 
-## Deploy a cluster on bare metal
+### Deploy a cluster on bare metal
 
 Following the [official instruction](https://pulsar.apache.org/docs/en/deploy-bare-metal/).
 
-Using Conf
+**Attention**
 
-```bash
+Different the official instruction, an additonal setting need to change in `bookkeeper.conf`
+```
+prometheusStatsHttpPort=8100
+```
+
+#### 1. Use configure files in `conf` floder to repalce the default configure
+
+File change list
+
++ zookkeeper.conf
++ bookkeeper.conf
++ broker.conf
++ pulsar-env. sh (Change JVM memory, not necessary)
++ bkenv. sh (Change JVM memory, not necessary)
+
+#### 2. Deplot zookeeper cluster
+
+```shell script
 mkdir -pv data/zookeeper
 echo 1 > data/zookeeper/myid
 ```
 
-Start zookeeper
-
-```bash
+```shell script
 bin/pulsar-daemon start zookeeper
 ```
 
-```bash
-bin/pulsar initialize-cluster-metadata --cluster pulsar-cluster-1 --zookeeper 219.219.223.222:2181 --configuration-store 219.219.223.222:2181 --web-service-url http://219.219.223.222:8080,219.219.223.224:8080,219.219.223.226:8080 --web-service-url-tls https://219.219.223.222:8443,219.219.223.224:8443,219.219.223.226:8443 --broker-service-url pulsar://219.219.223.222:6650,219.219.223.224:6650,219.219.223.226:6650 --broker-service-url-tls pulsar+ssl://219.219.223.222:6651,219.219.223.6651
-```
-prometheusStatsHttpPort=8100
+#### 3. Initialize cluster metadata
 
-```bash
+```shell script
+bin/pulsar initialize-cluster-metadata --cluster pulsar-cluster-1 --zookeeper host1:2181 --configuration-store host1:2181 --web-service-url http://host1:8080,host2:8080,host3:8080 --web-service-url-tls https://host1:8443,host2:8443,host3:8443 --broker-service-url pulsar://host1:6650,host2:6650,host3:6650 --broker-service-url-tls pulsar+ssl://host1:6651,host2:6651,host3:6651
+```
+
+#### 4. Start a bookkeeper cluster
+
+```shell script
 bin/bookkeeper shell metaformat
 ```
 
-```bash
+```shell script
 bin/pulsar-daemon start bookie
 ```
 
-```bash
+#### 5. Start a broker cluster
+
+```shell script
 bin/pulsar-daemon start broker
 ```
 
-```bash
+Then, use the following command to check availability.
+
+```shell script
 bin/pulsar-admin brokers list pulsar-cluster
 ```
 
-
-bin/pulsar standalone --advertised-address 1.2.3.4
 ### Usage
 
-Config the 
-
-Build the project
+#### Build the project
 
 ```shell script
 mvn clean package
 ```
 
+#### Use `TestConfig.json` to config this project
+
+When conf is change, do not need to rebuild the project
+
+| Parameter Name | Meaning |
+| ------------- | :---------- |
+| producerThreadNumber | Number of producers |
+| consumerThreadNumber | Number of consumers (need to be equial with number of producers) |
+| topicNumberPerThread | Number of topic per producer/comsumer (the total topic number = producerThreadNumber * topicNumberPerThread) |
+| payload-size | Byte (default 1024, 1 Kb) |
+| statsFolderName | path to store stats results |
+| enableTopicStats | whether or not record the stats of each topic (*Attention*: each topic will create a record file if it's enable) |
+
+#### Start the project
+
 Start Producer
 
 ```shell script
-java -cp ./target/pulsar-demo-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.ProducerThreadPool
+java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.ProducerThreadPool
 ```
 
 Start Consumer
 
 ```shell script
-java -cp ./target/pulsar-demo-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.ConsumerThreadPool
+java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.ConsumerThreadPool
 ```
 
+Make a stat
+
+```shell script
+java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.PulsarTestAdmin
+```
+
+### TODO
+
++ Support the scenarios where there are more producers than consumers.
++ Support continues stats for Apache Pulsar Cluster
