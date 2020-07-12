@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <pulsar.version>2.5.2</pulsar.version>
+        <pulsar.version>2.6.0</pulsar.version>
     </properties>
 
     <build>
@@ -29,9 +29,9 @@
                 <version>3.1.0</version>
             </plugin>
             <plugin>
-            <!-- NOTE: We don't need a groupId specification because the group is
-                 org.apache.maven.plugins ...which is assumed by default.
-             -->
+                <!-- NOTE: We don't need a groupId specification because the group is
+                     org.apache.maven.plugins ...which is assumed by default.
+                 -->
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
@@ -56,6 +56,11 @@
         <dependency>
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-client</artifactId>
+            <version>${pulsar.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-client-admin</artifactId>
             <version>${pulsar.version}</version>
         </dependency>
     </dependencies>

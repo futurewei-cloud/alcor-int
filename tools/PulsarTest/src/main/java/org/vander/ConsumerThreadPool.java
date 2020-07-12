@@ -1,21 +1,25 @@
 package org.vander;
 
 
+import org.vander.consumer.ConsumerRunnable;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ConsumerThreadPool {
     public static void main(String[] args) {
-        int consumerThreadCount = 20;
-        int topicNumber = 20;
+        PulsarConfig config = new PulsarConfig();
 
-        String url = "pulsar://localhost:6650";
-        String topicName = "my-topic-";
-        String subtopicName = "my-subscription";
+        int consumerThreadNumber = config.getConsumerThreadNumber();
+        int topicNumberPerThread = config.getTopicNumberPerThread();
 
-        ExecutorService pool = Executors.newFixedThreadPool(consumerThreadCount);
-        for (int topicIndex = 0; topicIndex < topicNumber; topicIndex++) {
-            pool.submit(new ConsumerRunnable(url, topicName + Integer.toString(topicIndex), subtopicName));
+        String url = config.getConsumerUrl();
+        String topicName = config.getTopicName();
+        String subtopicName = config.getTopicName();
+
+        ExecutorService pool = Executors.newFixedThreadPool(consumerThreadNumber);
+        for (int threadIndex = 0; threadIndex < consumerThreadNumber; threadIndex++) {
+            pool.submit(new ConsumerRunnable(url, topicName + Integer.toString(threadIndex), subtopicName, topicNumberPerThread));
         }
         pool.shutdown();
     }
