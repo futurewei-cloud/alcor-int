@@ -113,7 +113,7 @@ java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander
 Make a stat
 
 ```shell script
-java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.PulsarTestAdmin
+java -cp ./target/PulsarTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.vander.PulsarStatsAdmin
 ```
 
 ### TODO
