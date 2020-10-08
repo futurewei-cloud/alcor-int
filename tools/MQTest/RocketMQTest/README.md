@@ -9,7 +9,7 @@ Before starting, the following information should be prepared:
 
 Move to this directory and give scripts execution permission
 ```SHELL
-cd ~/mizar-mp/tools/RocketMQTest
+cd ~/RocketMQTest
 chmod +x ./scripts/*.sh
 ```
 
