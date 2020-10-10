@@ -1,5 +1,5 @@
-./start_scripts/start_zookeeper.sh
-./start_scripts/init_metadata.sh
-./start_scripts/metaformat.sh
-./start_scripts/start_bookkeeper.sh
-./start_scripts/start_broker.sh
+bash ./start_scripts/start_zookeeper.sh
+bash ./start_scripts/init_metadata.sh
+bash ./start_scripts/metaformat.sh
+bash ./start_scripts/start_bookkeeper.sh
+bash ./start_scripts/start_broker.sh

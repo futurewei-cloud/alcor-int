@@ -1,3 +1,56 @@
+## Key-shared Mode 
+
+Following the [official introduction](https://pulsar.apache.org/docs/en/concepts-messaging/#key_shared).
+(How to assign a key to the consumer is not mentioned on the official website.)
+
+When a producer pushes a message to Pulsar broker in key-based mode, Pulsar broker uses the following function to calculate the hash for the key:
+```
+Murmur3_32Hash.getInstance().makeHash(key) % 65536
+```
+and determines which consumer the key would be forwarded to.
+
+### Configuration producer
+```java
+producer = client.newProducer(Schema.STRING)
+        .topic("topic-1")
+        .batcherBuilder(BatcherBuilder.KEY_BASED)
+        .hashingScheme(HashingScheme.Murmur3_32Hash)
+        .create();
+
+producer.newMessage()
+                .key("key")
+                .value("Key-test").send();
+```
+
+### Auto split hash consumer
+
+```java
+client.newConsumer()
+        .subscriptionMode(SubscriptionMode.Durable)
+        .topic("topic-1")
+        .subscriptionName("key-subscription-hashed")
+        .subscriptionType(SubscriptionType.Key_Shared)
+        .keySharedPolicy(KeySharedPolicy.autoSplitHashRange())
+        .subscribe();
+```
+
+### Consistent auto split hash consumer
+
+The Sticky hash can be calculated manually.
+
+```java
+
+int hashcode = Murmur3_32Hash.getInstance().makeHash("key") % 65536;
+
+client.newConsumer()
+        .subscriptionMode(SubscriptionMode.Durable)
+        .topic("topic-1")
+        .subscriptionName("key-subscription-hashed")
+        .subscriptionType(SubscriptionType.Key_Shared)
+        .keySharedPolicy(KeySharedPolicy.stickyHashRange().ranges(Range.of(hashcode, hashcode)))
+        .subscribe();
+```
+
 ## Deployment
 
 ### Deploy with Docker

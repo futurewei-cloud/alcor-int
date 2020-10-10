@@ -1,4 +1,4 @@
-./stop_scripts/stop_broker.sh
-./stop_scripts/stop_bookkeeper.sh
-./stop_scripts/stop_zookeeper.sh
-./stop_scripts/clean.sh
+bash ./stop_scripts/stop_broker.sh
+bash ./stop_scripts/stop_bookkeeper.sh
+bash ./stop_scripts/stop_zookeeper.sh
+bash ./stop_scripts/clean.sh

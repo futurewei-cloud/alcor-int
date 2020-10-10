@@ -33,6 +33,7 @@ public class SharedConsumerRunnable implements Runnable {
             for (int topicIndex = 0; topicIndex < config.getTopicNumberPerThread(); topicIndex++) {
                 consumerList.add(client.newConsumer()
                         .topic(config.getTopicName() + threadIndex + "-" + topicIndex)
+//                        .keySharedPolicy(new KeySharedPolicy())
                         .ackTimeout(30, TimeUnit.SECONDS)
                         .subscriptionName(config.getTopicName())
                         .subscriptionType(SubscriptionType.Shared)
