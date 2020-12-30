@@ -1,8 +1,6 @@
 # ACA Deployment
 
 This wiki describes how to use scripts in this folder to automatically deploy Alcor Controller Agents on each compute nodes. 
-Section 1 and 2 are from the following web page:  
-[https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/setup-credentials.html](https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/setup-credentials.html)
 
 Before starting, you need to configure public-key authentication on each compute nodes.
 The deployment node should be able to access (via ssh and scp) to those compute nodes without password.
