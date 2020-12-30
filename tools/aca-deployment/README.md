@@ -6,9 +6,9 @@ Before starting, you need to configure public-key authentication on each compute
 The deployment node should be able to access (via ssh and scp) to those compute nodes without password.
 
 ## 1. Prepare Compute Nodes File
-Create a new file or Modify `compute_node_ips.txt`. List IP address of each compute node on management network in the file. 
+Create a new file or modify `compute_node_ips.txt`. List IP address of each compute node on management network in the file. 
 
-## 2. Run the depolyment script
+## 2. Run the deployment script
 Run `update-compute-nodes.sh` on the deployment host. The script will copy `aca_update.sh` to each compute node and run them parallel.  
 
 ```
