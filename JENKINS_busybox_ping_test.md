@@ -114,12 +114,18 @@ sudo:x:27:ubuntu,jenkins
 
 3. Since the ping test makes use of user 'ubuntu', ensure that ubuntu is part of docker group. Edit the file /etc/group to include:
 ```
-docker:x:115:ubuntu
+docker:x:<id>:ubuntu
 ```
 
 4. Edit the file /etc/sudoers to uncomment the line. This is required by ping test as it connects to target hosts without a tty session to perform tasks.
 ```
 Defaults  !requiretty
+```
+
+5. The user jenkins also needs password less access to the target nodes. Since user 'ubuntu' is already provided password less access, copy the .ssh folder of 'ubuntu' and place it in the jenkins home page:
+```
+cp -pr /home/ubuntu/.ssh /var/lib/jenkins
+chown -R jenkins:jenkins /var/lib/jenkins/.ssh
 ```
 
 5. While running jenkins job periodically, ensure the time zones matches your location. By default Jenkins uses UTC time zone. You can change it to PST by adding following option in the configuration:
