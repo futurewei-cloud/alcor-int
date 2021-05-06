@@ -112,7 +112,17 @@ A usual work around for this issue is to run the job scripts as sudoas.
 sudo:x:27:ubuntu,jenkins
 ```
 
-3. While running jenkins job periodically, ensure the time zones matches your location. By default Jenkins uses UTC time zone. You can change it to PST by adding following option in the configuration:
+3. Since the ping test makes use of user 'ubuntu', ensure that ubuntu is part of docker group. Edit the file /etc/group to include:
+```
+docker:x:115:ubuntu
+```
+
+4. Edit the file /etc/sudoers to uncomment the line. This is required by ping test as it connects to target hosts without a tty session to perform tasks.
+```
+Defaults  !requiretty
+```
+
+5. While running jenkins job periodically, ensure the time zones matches your location. By default Jenkins uses UTC time zone. You can change it to PST by adding following option in the configuration:
 ```
 TZ=Americas/Los_Angeles
 ```
