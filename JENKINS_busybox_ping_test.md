@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 Running of automated Alcor builds and ping tests through jenkins can be performed by following these steps:
 * For the Alcor ping tests, ideally we will require 3 machines. For our test case, an ubuntu VM is sufficient. Create and identify the 3 VMs. Lets call them host1, host2 and host3.
 
-* host1 will be used for building and running the alcor services. It will also be the node which will access host2 and host2 to deploy the busybox containers on them and run a ping test between them. See the README.rd file of Alcor to learn about setting up of this host with necessary packages and configuration.
+* host1 will be used for building and running the alcor services. It will also be the node which will access host2 and host3 to deploy the busybox containers on them and run a ping test between them. See the README.rd file of Alcor to learn about setting up of this host with necessary packages and configuration.
 
 * host2 and host3 will the target nodes which will be running ACA service. One busybox container on each of these hosts will be installed and configured to use the goal state network configuration provided by Alcor services from host1. See the README.rd file of alcor-control-agent to learn about setting up of this host with necessary dependent packages and configuration.
 
@@ -118,15 +118,33 @@ Running the jobs:
 
 4. At the end a successful job will show up in the history with a blue icon and failure with a red icon. 
 
+# Sending periodic emails
+* Jenkins can be configured to send email reports of any jobs being run. In order to configure that follow the steps below:
+1. Ensure that Jenkins has email notification pluggin installed. It usually gets installed by default. If not, get that installed.
+2. From jenkins home page, go to Manage Jenkins and click on configure system.
+3. Look for 'Extended Email Notification' section, fill in the fields for 'SMTP server' and 'SMTP port'. Click on the 'Advanced' option to view the fields of 'SMTP Username' and 'SMTP Password'. Fill in the fields with username and password. In our case of Alcor ping tests, we have made use of a gmail account. The SMTP server and ports used are smtp.gmail.com and 465. The username used is fw.cloud.networking@gmail.com. 
+4. Select the checkbox 'Use SSL'
+5. There is an optional field to fill default recipients where you can add a comma separated list of email IDs where you want to send emails.
+6. Save the page
 
-#
-Miscellaneous
-1. The jenkins workspace is by default located at /var/lib/jenkins/
-Any job that we run from jenkins should keep into account the permissions needed to run commands at this location. For example, if your script creates any new files locally using a different account credentials (like 'ubunut') then that user should have permissions to do so at this location.
-In other case if the script is reaching out to files in different parts of filesystem, then ensure that user jenkins as permissions to do so.
-A usual work around for this issue is to run the job scripts as sudoas.
+* Now you can go to the individual jobs dashboard and configure when to send emails:
+1. Go to the job's configure section. Near the bottom of page click on 'Add post-build action' and choose 'E-mail notification'.
+2. In the recipients field, add a list of comma separated list of users.
+3. Select 'Send e-mail for every unstable build'
+4. Again click on 'Add post-build action' and select 'Editable Email Notification
+5. Leave all of the fields with their default values and select 'Advanced' option to view 'Triggers' section.
+6. Click on 'Add Trigger' and select an option for which you want email to be sent. Select 'Always' for getting emails for every job being run.
+7. In the 'Send To' option choose 'Recipient List'.
+8. Save the page.
 
-2. Give 'jenkins' user a sudo permission by keeping it in sudo group. Edit the file file /etc/group and add the user jenkins to sudo group as shown below:
+
+# Miscellaneous
+1. The jenkins workspace is by default located at /var/lib/jenkins/.
+Any job that we run from jenkins should keep into account the permissions needed to run commands at this location. For example, if your script creates any new files locally using a different account credentials (like 'ubuntu') then that user should have permissions to do so at this location.
+In other case if the script is reaching out to files in different parts of filesystem, then ensure that user 'jenkins' as permissions to do so.
+A usual work around for this issue is to run the job scripts as sudo.
+
+2. Give user 'ubuntu' and 'jenkins' a sudo permissions by keeping them in sudo group. Edit the file file /etc/group and add the users to sudo group as shown below:
 ```
 sudo:x:27:ubuntu,jenkins
 ```
@@ -155,3 +173,4 @@ Jenkins by default makes use of the environment variables of the host on which i
 ```
 http://<IP>:8080/env-vars.html/
 ```
+
