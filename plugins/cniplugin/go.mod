@@ -3,7 +3,7 @@ module github.com/futurewei-cloud/mizar-mp/cniplugin
 go 1.12
 
 require (
-	github.com/containernetworking/cni v0.7.1
+	github.com/containernetworking/cni v0.8.1
 	github.com/containernetworking/plugins v0.8.3
 	github.com/go-resty/resty/v2 v2.1.0
 	github.com/google/uuid v1.1.1
