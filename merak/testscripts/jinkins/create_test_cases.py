@@ -201,6 +201,8 @@ def create_port_goal_states(port, change_ports):
       # Adding the same subnet ID twice because it is going to be same for two ports we are creating
       subnet_ids.append(port_dict['subnet_id'])
       subnet_ids.append(port_dict['subnet_id'])
+
+
     if 'device_id' in changes:
       device_ids = change_ports['device_ids']
     else:
@@ -208,19 +210,29 @@ def create_port_goal_states(port, change_ports):
       # Adding the same device ID twice because it is going to be same for two ports we are creating
       device_ids.append(port_dict['device_id'])
       device_ids.append(port_dict['device_id'])
+
+
     if 'security_groups' in changes:
       security_groups = change_ports['security_groups']
     else:
       # Adding the same security group ID twice because it is going to be same for two ports we are creating
       security_groups.append(port_dict['security_groups'])
       security_groups.append(port_dict['security_groups'])
+
+
     if 'ip_addrs' in changes:
       ip_addrs = change_ports['ip_addrs']
     else:
       ip_addrs  = port_dict['fixed_ips']
+
+
     for index in range(len(ip_addrs)):
       ports = {}
-      port_info = {"admin_state_up":True,"allowed_address_pairs":[{"ip_address":"11.11.11.11","mac_address":"00-AA-BB-15-EB-3F"}],"binding:host_id":node_name[index],"binding:vif_details":{},"create_at":"string","description": "string","device_id":device_ids[index],"device_owner": "compute:nova","dns_assignment": {},"dns_domain": "string","dns_name": "string","extra_dhcp_opts": [{"ip_version": "string","opt_name":"string","opt_value": "string"}],"fast_path": True,"fixed_ips":[{"ip_address": ip_addrs[index],"subnet_id":subnet_ids[index]}],"id": port_id[index],"mac_learning_enabled": True,"name": port_name[index],"network_id": port_dict['network_id'],"network_ns": "string","port_security_enabled": True,"project_id":port_dict['project_id'],"qos_network_policy_id": "string","qos_policy_id": "string","revision_number": 0,"security_groups": [security_groups[index]],"tags": ["string"],"tenant_id":port_dict['tenant_id'],"update_at": "string","uplink_status_propagation": True,"veth_name":"string"}
+      port_info = {"admin_state_up":True,
+      "allowed_address_pairs":
+      [{"ip_address":"11.11.11.11",
+      "mac_address":"00-AA-BB-15-EB-3F"}],
+      "binding:host_id":node_name[index],"binding:vif_details":{},"create_at":"string","description": "string","device_id":device_ids[index],"device_owner": "compute:nova","dns_assignment": {},"dns_domain": "string","dns_name": "string","extra_dhcp_opts": [{"ip_version": "string","opt_name":"string","opt_value": "string"}],"fast_path": True,"fixed_ips":[{"ip_address": ip_addrs[index],"subnet_id":subnet_ids[index]}],"id": port_id[index],"mac_learning_enabled": True,"name": port_name[index],"network_id": port_dict['network_id'],"network_ns": "string","port_security_enabled": True,"project_id":port_dict['project_id'],"qos_network_policy_id": "string","qos_policy_id": "string","revision_number": 0,"security_groups": [security_groups[index]],"tags": ["string"],"tenant_id":port_dict['tenant_id'],"update_at": "string","uplink_status_propagation": True,"veth_name":"string"}
       ports["port"] = port_info
       print(ports, url)
       print("Posting goal state")
