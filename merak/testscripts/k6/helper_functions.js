@@ -231,6 +231,20 @@ export function get_cidr_network_address_range(cidr_network_addr) {
     return return_ip(network_address, mask)
 }
 
+// Deep copy of object
+export function cloneObj(obj) {
+    if (typeof obj !== 'object') {
+        return obj;
+    } else {
+        var newobj = obj.constructor === Array ? [] : {};
+        for (var i in obj) {
+            newobj[i] = typeof obj[i] === 'object' ? cloneObj(obj[i]) : obj[i];
+        }
+        return newobj;
+    }
+}
+
+
 // K6 test function
 export default function() {
     let res;
@@ -254,5 +268,15 @@ export default function() {
     // res = return_ip(network_broadcast["network_addr"], network_broadcast["broadcast_addr"], gateway)
     // console.log(JSON.stringify(res))
 
-    res = get_cidr_network_address_range("10.0.0.0/8")
+    // res = get_cidr_network_address_range("10.0.0.0/8")
+
+    let A = { "B": 1234, "c": [1, 2, 3, 4], "D": { "E": true } }
+    let F = cloneObj(A)
+    console.log(JSON.stringify(A))
+    console.log(JSON.stringify(F))
+    A["B"] = 88888
+    console.log(JSON.stringify(A))
+    console.log(JSON.stringify(F))
+
+
 }
