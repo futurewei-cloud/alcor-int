@@ -204,7 +204,23 @@ alcor_services["router_info"]["router_info"] = {
     "id": "11112801-d675-4688-a63f-dcda8d327f50"
 }
 
-
+// Test Controller Alcor HTTP APIs Test Params 
+alcor_services["TC"]={}
+alcor_services["TC"]["vpm_ip"]="127.0.0.1"
+alcor_services["TC"]["vpm_port"] = 8080
+alcor_services["TC"]["snm_ip"] = "127.0.0.1"
+alcor_services["TC"]["snm_port"] = 8081
+alcor_services["TC"]["pm_ip"] = "127.0.0.1"
+alcor_services["TC"]["pm_port"] = 8081
+alcor_services["TC"]["vpc_cidr_slash"] = 8
+alcor_services["TC"]["tenant_amount"] = 1
+alcor_services["TC"]["project_amount_per_tenant"] = 1
+alcor_services["TC"]["vpc_amount_per_project"] = 1
+alcor_services["TC"]["subnet_amount_per_vpc"] = 1
+alcor_services["TC"]["test_vpc_api"] = true
+alcor_services["TC"]["test_subnet_api"] = true
+alcor_services["TC"]["test_port_api"] = true
+alcor_services["TC"]["call_api_rate"] = 100
 
 export function get_alcor_services_info(key1, key2) {
     if (alcor_services.hasOwnProperty(key1)) {

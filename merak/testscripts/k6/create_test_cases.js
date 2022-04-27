@@ -15,8 +15,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import http from 'k6/http';
-import { sleep } from 'k6';
 import { get_alcor_services_info, get_service_port_map } from './alcor_services.js'
 import * as create_test_setup from './create_test_setup.js'
 import { put_httprequest, post_httprequest, get_httprequest, get_mac_from_db } from './prepare_payload.js'
@@ -348,11 +346,11 @@ export function prepare_test_L3_CreatePorts_then_AttachRouter(ip_mac, ser_port) 
 }
 
 // K6 test function
-export default function () {
-    let ip_mac = [{ "ip": "1.1.1.1", "mac": "123" }, { "ip": "2.2.2.2", "mac": "345" }]
-    let ser_port = get_service_port_map()
-    prepare_test_L2_basic(ip_mac, ser_port)
-    prepare_test_L3_AttachRouter_then_CreatePorts(ip_mac, ser_port)
-    prepare_test_L3_CreatePorts_then_AttachRouter(ip_mac, ser_port)
-}
+// export default function () {
+//     let ip_mac = [{ "ip": "1.1.1.1", "mac": "123" }, { "ip": "2.2.2.2", "mac": "345" }]
+//     let ser_port = get_service_port_map()
+//     prepare_test_L2_basic(ip_mac, ser_port)
+//     prepare_test_L3_AttachRouter_then_CreatePorts(ip_mac, ser_port)
+//     prepare_test_L3_CreatePorts_then_AttachRouter(ip_mac, ser_port)
+// }
 

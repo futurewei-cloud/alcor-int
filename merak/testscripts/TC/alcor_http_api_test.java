@@ -177,7 +177,11 @@ public class alcor_http_api_test {
                         try {
                             System.out.println("Need to generate port IPs for the first time.");
                             IPAddressString whole_vpc_address = new IPAddressString(vpc_cidr);
+                            // toSequentialRange() 
+                            // Returns the range of sequential addresses from the lowest address specified 
+                            // in this address string to the highest.
                             IPAddressSeqRange whole_vpc_address_range = whole_vpc_address.toSequentialRange();
+                            // stream() Returns a sequential stream of the individual address components.
                             Iterator<IPAddress> range_iterator = (Iterator<IPAddress>) whole_vpc_address_range.stream().iterator();
 
                             vpc_port_ips = new ArrayList<>();
@@ -201,12 +205,29 @@ public class alcor_http_api_test {
                             String subnet_end_ip = vpc_port_ips.get((l * subnet_port_amount) + subnet_port_amount - 1);
                             IPAddressString subnet_start_ip_address_string = new IPAddressString(subnet_start_ip);
                             IPAddressString subnet_end_ip_address_string = new IPAddressString(subnet_end_ip);
+                            /*
+                                public IPAddress getAddress()
+                                If this represents an ip address, returns that address. Otherwise, returns null.
+                                This method will return null for invalid formats. 
+                                Use toAddress() for an equivalent method that throws exceptions for invalid formats.
+
+                                If you have a prefix address and you wish to get only the host without the prefix, use getHostAddress()
+
+                                Specified by:
+                                getAddress in interface HostIdentifierString
+                                Returns:
+                                the address
+                            */
                             IPAddress subnet_start_ip_address = subnet_start_ip_address_string.getAddress();
                             IPAddress subnet_end_ip_address = subnet_end_ip_address_string.getAddress();
                             IPAddressSeqRange subnet_range = subnet_start_ip_address.toSequentialRange(subnet_end_ip_address);
+                            /*
+                            	spanWithPrefixBlocks()
+                                fix blocks that spans the same set of addresses.
+                            */
                             IPAddress blocks[] = subnet_range.spanWithPrefixBlocks();
                             String subnet_cidr = blocks[0].toString();
-//                            System.out.println("Subnet cidr = " + subnet_cidr);
+                            //  System.out.println("Subnet cidr = " + subnet_cidr);
                             String current_subnet_id = UUID.randomUUID().toString();
                             JSONObject subnet_payload = new JSONObject();
                             JSONObject subnet = new JSONObject();
@@ -220,7 +241,7 @@ public class alcor_http_api_test {
                             if (test_port_api){
                                 List<String> subnet_port_ips = vpc_port_ips.subList((l * subnet_port_amount) + 0, (l * subnet_port_amount) + subnet_port_amount);
                                 ArrayList<JSONObject> current_subnet_ports = new ArrayList<>();
-//                                System.out.println("Generating ports for current subnet, it has " + subnet_port_ips.size() + " ports");
+                            //  System.out.println("Generating ports for current subnet, it has " + subnet_port_ips.size() + " ports");
                                 for(String port_ip_in_subnet : subnet_port_ips){
                                     JSONObject port_payload = new JSONObject();
                                     JSONObject port = new JSONObject();
@@ -247,7 +268,7 @@ public class alcor_http_api_test {
                                     port_payload.put("port", port);
                                     current_subnet_ports.add(port_payload);
                                 }
-//                                System.out.println("Finished generating ports for subnet.");
+                                //  System.out.println("Finished generating ports for subnet.");
                                 subnet_ports.put(current_subnet_id, current_subnet_ports);
                             }
 
@@ -255,25 +276,24 @@ public class alcor_http_api_test {
                         System.out.println("Finished generating subnets for vpc.");
                         vpc_subnets.put(current_vpc_id, current_vpc_subnets);
                     }
-
                 }
                 project_vpcs.put(current_project_id, vpcs_inside_a_project);
             }
             tenant_projects.put(current_tenant_uuid, current_tenant_projects);
         }
+////////////////////////////////////////
+        // System.out.println("Created JSON payloads for " + tenant_uuids.size() + " tenants, \neach tenant has "
+        //         + tenant_projects.get(tenant_projects.firstKey()).size() + " projects, \neach project has "
+        //         + project_vpcs.get(project_vpcs.firstKey()).size() + " vpcs, \neach vpc has "
+        //         + (test_subnet_api ? vpc_subnets.get(vpc_subnets.firstKey()).size() : 0) + " subnets, \neach subnet has "
+        //         + (test_port_api ? subnet_ports.get(subnet_ports.firstKey()).size() : 0) + " ports.");
 
-        System.out.println("Created JSON payloads for " + tenant_uuids.size() + " tenants, \neach tenant has "
-                + tenant_projects.get(tenant_projects.firstKey()).size() + " projects, \neach project has "
-                + project_vpcs.get(project_vpcs.firstKey()).size() + " vpcs, \neach vpc has "
-                + (test_subnet_api ? vpc_subnets.get(vpc_subnets.firstKey()).size() : 0) + " subnets, \neach subnet has "
-                + (test_port_api ? subnet_ports.get(subnet_ports.firstKey()).size() : 0) + " ports.");
-
-        System.out.println("Time to call those APIs! Calling APIs at " + call_api_rate + "/second");
-        // Maximum 100 API calls per second.
-        RateLimiter rateLimiter = RateLimiter.create(call_api_rate);
-        // Create a thread pool that has the same amount of threads as the rateLimiter
-        ExecutorService concurrent_create_resource_thread_pool = Executors.newFixedThreadPool(call_api_rate);
-
+        // System.out.println("Time to call those APIs! Calling APIs at " + call_api_rate + "/second");
+        // // Maximum 100 API calls per second.
+        // RateLimiter rateLimiter = RateLimiter.create(call_api_rate);
+        // // Create a thread pool that has the same amount of threads as the rateLimiter
+        // ExecutorService concurrent_create_resource_thread_pool = Executors.newFixedThreadPool(call_api_rate);
+//////////////////////////////////////////
         if (test_vpc_api){
             System.out.println("Time to test VPC API!");
             ArrayList<JSONObject> create_vpc_jobs = new ArrayList<>();
@@ -281,26 +301,26 @@ public class alcor_http_api_test {
                 create_vpc_jobs.addAll(project_vpcs.get(project_id));
             }
 
-            int vpc_call_amount = create_vpc_jobs.size();
-            CountDownLatch latch = new CountDownLatch(vpc_call_amount);
-            int latch_wait_seconds = (vpc_call_amount / call_api_rate) + 1;
-            System.out.println("This VPC test will call createVPC API " + vpc_call_amount +
-                    " times, at the rate of " + call_api_rate + "/second, it will wait at most "
-                    + latch_wait_seconds + " seconds");
-            AtomicInteger create_vpc_success_count = new AtomicInteger(0);
-            long call_vpc_api_start_time = System.currentTimeMillis();
+            // int vpc_call_amount = create_vpc_jobs.size();
+            // CountDownLatch latch = new CountDownLatch(vpc_call_amount);
+            // int latch_wait_seconds = (vpc_call_amount / call_api_rate) + 1;
+            // System.out.println("This VPC test will call createVPC API " + vpc_call_amount +
+            //         " times, at the rate of " + call_api_rate + "/second, it will wait at most "
+            //         + latch_wait_seconds + " seconds");
+            // AtomicInteger create_vpc_success_count = new AtomicInteger(0);
+            // long call_vpc_api_start_time = System.currentTimeMillis();
             for (JSONObject vpc_job : create_vpc_jobs) {
-                rateLimiter.acquire();
+                // rateLimiter.acquire();
                 String current_project_id = (String)((JSONObject)vpc_job.get("network")).get("project_id");
                 String create_vpc_url = "http://" + vpm_ip + ":" + vpm_port + "/project/" + current_project_id + "/vpcs";
-                concurrent_create_resource_thread_pool.execute(() -> {
+                // concurrent_create_resource_thread_pool.execute(() -> {
                     JSONObject create_vpc_response = call_post_api_with_json(create_vpc_url, vpc_job);
                     if (null != create_vpc_response && create_vpc_response.containsKey("network")){
-//                                System.out.println("Created VPC successfully");
-                        create_vpc_success_count.incrementAndGet();
+                        System.out.println("Created VPC successfully");
+                        // create_vpc_success_count.incrementAndGet();
                     }
-                    latch.countDown();
-                });
+                    // latch.countDown();
+                // });
             }
             try {
                 if (test_subnet_api || test_port_api){
@@ -315,12 +335,12 @@ public class alcor_http_api_test {
                     */
                     latch.await(/*latch_wait_seconds*/ 1, TimeUnit.SECONDS);
                 }
-                long call_vpc_api_end_time = System.currentTimeMillis();
-                System.out.println("Total amount of calling createVPC API " + vpc_call_amount +
-                        " times, finished "+ ( vpc_call_amount - latch.getCount())
-                        + " times, succeeded " + create_vpc_success_count.get() + " times, at the rate of "
-                        + call_api_rate + "/second, it took "
-                        + (call_vpc_api_end_time - call_vpc_api_start_time) + " milliseconds");
+            //     long call_vpc_api_end_time = System.currentTimeMillis();
+            //     System.out.println("Total amount of calling createVPC API " + vpc_call_amount +
+            //             " times, finished "+ ( vpc_call_amount - latch.getCount())
+            //             + " times, succeeded " + create_vpc_success_count.get() + " times, at the rate of "
+            //             + call_api_rate + "/second, it took "
+            //             + (call_vpc_api_end_time - call_vpc_api_start_time) + " milliseconds");
             } catch (InterruptedException e) {
                 System.err.println("Waited 60 seconds but can't get VPC response!");
                 e.printStackTrace();
@@ -333,22 +353,22 @@ public class alcor_http_api_test {
             for (String vpc_id : vpc_subnets.keySet()) {
                 create_subnet_jobs.addAll(vpc_subnets.get(vpc_id));
             }
-            CountDownLatch latch = new CountDownLatch(create_subnet_jobs.size());
-            int subnet_call_amount = create_subnet_jobs.size();
-            int latch_wait_seconds = (subnet_call_amount / call_api_rate) + 1;
-            System.out.println("This subnet test will call createSubnet API " + subnet_call_amount +
-                    " times, at the rate of " + call_api_rate + "/second, it will wait at most "
-                    + latch_wait_seconds + " seconds");
-            AtomicInteger create_subnet_success_count = new AtomicInteger(0);
-            long call_subnet_api_start_time = System.currentTimeMillis();
+            // CountDownLatch latch = new CountDownLatch(create_subnet_jobs.size());
+            // int subnet_call_amount = create_subnet_jobs.size();
+            // int latch_wait_seconds = (subnet_call_amount / call_api_rate) + 1;
+            // System.out.println("This subnet test will call createSubnet API " + subnet_call_amount +
+            //         " times, at the rate of " + call_api_rate + "/second, it will wait at most "
+            //         + latch_wait_seconds + " seconds");
+            // AtomicInteger create_subnet_success_count = new AtomicInteger(0);
+            // long call_subnet_api_start_time = System.currentTimeMillis();
             for (JSONObject subnet_job : create_subnet_jobs) {
-                rateLimiter.acquire();
+                // rateLimiter.acquire();
                 String current_project_id = (String)((JSONObject)subnet_job.get("subnet")).get("project_id");
                 String create_subnet_url = "http://" + snm_ip + ":" + snm_port + "/project/" + current_project_id + "/subnets";
                 concurrent_create_resource_thread_pool.execute(() -> {
                     JSONObject create_vpc_response = call_post_api_with_json(create_subnet_url, subnet_job);
                     if (null != create_vpc_response && create_vpc_response.containsKey("subnet")){
-//                                System.out.println("Created VPC successfully");
+                    //  System.out.println("Created VPC successfully");
                         create_subnet_success_count.incrementAndGet();
                     }
                     latch.countDown();
@@ -390,13 +410,13 @@ public class alcor_http_api_test {
                 create_port_jobs.addAll(current_subnet_ports);
             }
             CountDownLatch latch = new CountDownLatch(create_port_jobs.size());
-            int port_call_amount = create_port_jobs.size();
-            int latch_wait_seconds = (port_call_amount / call_api_rate) + 1;
-            System.out.println("This port test will call createPort API " + port_call_amount +
-                    " times, at the rate of " + call_api_rate + "/second, it will wait at most "
-                    + latch_wait_seconds + " seconds");
-            AtomicInteger create_port_success_count = new AtomicInteger(0);
-            long call_port_api_start_time = System.currentTimeMillis();
+            // int port_call_amount = create_port_jobs.size();
+            // int latch_wait_seconds = (port_call_amount / call_api_rate) + 1;
+            // System.out.println("This port test will call createPort API " + port_call_amount +
+            //         " times, at the rate of " + call_api_rate + "/second, it will wait at most "
+            //         + latch_wait_seconds + " seconds");
+            // AtomicInteger create_port_success_count = new AtomicInteger(0);
+            // long call_port_api_start_time = System.currentTimeMillis();
             for (JSONObject port_job : create_port_jobs) {
                 rateLimiter.acquire();
                 String current_project_id = (String)((JSONObject)port_job.get("port")).get("project_id");
@@ -404,7 +424,7 @@ public class alcor_http_api_test {
                 concurrent_create_resource_thread_pool.execute(() -> {
                     JSONObject create_vpc_response = call_post_api_with_json(create_port_url, port_job);
                     if (null != create_vpc_response && create_vpc_response.containsKey("port")){
-//                                System.out.println("Created VPC successfully");
+                    //  System.out.println("Created VPC successfully");
                         create_port_success_count.incrementAndGet();
                     }
                     latch.countDown();
@@ -427,6 +447,7 @@ public class alcor_http_api_test {
                 e.printStackTrace();
             }
         }
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////
         /*
         System.out.println("Try to call API to create a VPC!");
         JSONObject example_vpc_payload = new JSONObject();
