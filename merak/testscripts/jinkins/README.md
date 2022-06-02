@@ -20,17 +20,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 # Busybox Ping Test
 
 # In this README:
-- [Introduction](#Introduction)
-- [Key Features](#Key-Features)
-- [Directory Structure](#Directory-Structure)
-- [Test Configuration](#Test-Configuration)
-- [Examples](#Examples)
-- [Preconditions](#Preconditions)
-- [Troubleshooting](#Troubleshooting)
-- [Running Test](#Running-Test)
+- [MIT License](#mit-license)
+- [Busybox Ping Test](#busybox-ping-test)
+- [In this README:](#in-this-readme)
+  - [Introduction](#introduction)
+  - [Key Features of Test Script](#key-features-of-test-script)
+  - [Directory Structure and Files](#directory-structure-and-files)
+  - [Test Configuration](#test-configuration)
+  - [Example](#example)
+  - [Preconditions](#preconditions)
+  - [Running Test](#running-test)
+  - [After Test Starts](#after-test-starts)
+  - [ACA on target hosts](#aca-on-target-hosts)
+  - [Troubleshooting](#troubleshooting)
+  - [Quick Start](#quick-start)
 
 ## Introduction
 This is an end to end test where we test two Busybox containers, hosted on same or different hosts, ping each other.The connectivity between the two Busybox containers is provided by Alcor services and Alcor Control Agent.
+
+This is a test document based on the K6 script rewritten by busybox Ping test
 
 ## Key Features of Test Script
   - Builds Alcor and docker images for all alcor services (optional).

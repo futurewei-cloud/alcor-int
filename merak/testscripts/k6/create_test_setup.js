@@ -17,7 +17,7 @@
 
 import { sleep } from 'k6';
 import { get_alcor_services_info, get_service_port_map } from './alcor_services.js'
-import { post_httprequest, get_httprequest,get_mac_from_db } from './prepare_payload.js'
+import { post_httprequest, get_httprequest, get_mac_from_db } from './prepare_payload.js'
 
 export function create_default_segment_table(port) {
     console.log("Create default segment table");
@@ -33,10 +33,10 @@ export function create_node(port, ip_mac) {
     console.log("url: " + url)
     let data = {}
     let nodeinfo = get_alcor_services_info("node_info", "node_info")
-    // console.log(JSON.stringify(nodeinfo))
+        // console.log(JSON.stringify(nodeinfo))
     let node_name = nodeinfo['node_name']
     let node_id = nodeinfo['node_id']
-    // console.log(node_name,node_id)
+        // console.log(node_name,node_id)
 
     // let ip_mac =[{"ip":"1.1.1.1","mac":"123"},{"ip":"2.2.2.2","mac":"345"}]
     for (let key_index = 0; key_index < ip_mac.length; key_index++) {
@@ -202,12 +202,10 @@ export function create_ports(port) {
         let ports = {}
         let port_info = {
             "admin_state_up": true,
-            "allowed_address_pairs": [
-                {
-                    "ip_address": "11.11.11.1",
-                    "mac_address": "00-AA-BB-15-EB-3F"
-                }
-            ],
+            "allowed_address_pairs": [{
+                "ip_address": "11.11.11.1",
+                "mac_address": "00-AA-BB-15-EB-3F"
+            }],
             "binding:host_id": node_name[index],
             "binding:vif_details": {},
             "create_at": "string",
@@ -217,20 +215,16 @@ export function create_ports(port) {
             "dns_assignment": {},
             "dns_domain": "string",
             "dns_name": "string",
-            "extra_dhcp_opts": [
-                {
-                    "ip_version": "string",
-                    "opt_name": "string",
-                    "opt_value": "string"
-                }
-            ],
+            "extra_dhcp_opts": [{
+                "ip_version": "string",
+                "opt_name": "string",
+                "opt_value": "string"
+            }],
             "fast_path": true,
-            "fixed_ips": [
-                {
-                    "ip_address": ip_addrs[index],
-                    "subnet_id": portinfo['subnet_id']
-                }
-            ],
+            "fixed_ips": [{
+                "ip_address": ip_addrs[index],
+                "subnet_id": portinfo['subnet_id']
+            }],
             "id": port_id[index],
             "mac_learning_enabled": true,
             "name": port_name[index],
@@ -276,19 +270,12 @@ export function create_test_setup(ip_mac) {
 
 
 // simple test
-// export default function () {
-//     create_default_segment_table(1)
-//     create_router_interface(2)
-//     let ip_mac = [{ "ip": "1.1.1.1", "mac": "123" }, { "ip": "2.2.2.2", "mac": "345" }]
-//     create_node(3, ip_mac) 
-//     create_router_interface(4)
-//     create_vpc(5)
-//     create_subnet(6)
-//     create_security_group(7)
-//     get_subnets(8)
-//     get_nodes(9)
-//     get_vpcs(10)
-//     get_ports(11)
-//     create_ports(12)
-//     create_test_setup(ip_mac)
-// }
+export default function() {
+    // let ip_mac = [{ "ip": "172.16.62.212", "mac": "a4:ae:12:79:c9:81" }, { "ip": "172.16.62.213", "mac": "a4:ae:12:79:5a:27" }]
+    // create_test_setup(ip_mac)
+    let service_port_map = get_service_port_map()
+    get_subnets(service_port_map["snm"])
+    get_nodes(service_port_map["nm"])
+    get_vpcs(service_port_map["vpm"])
+    get_ports(service_port_map["pm"])
+}
