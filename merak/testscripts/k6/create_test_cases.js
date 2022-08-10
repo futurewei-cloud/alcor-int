@@ -345,12 +345,11 @@ export function prepare_test_L3_CreatePorts_then_AttachRouter(ip_mac, ser_port) 
     return ip_mac_db
 }
 
-// K6 test function
-// export default function () {
-//     let ip_mac = [{ "ip": "1.1.1.1", "mac": "123" }, { "ip": "2.2.2.2", "mac": "345" }]
-//     let ser_port = get_service_port_map()
-//     prepare_test_L2_basic(ip_mac, ser_port)
+export default function () {
+     let ip_mac = [{ "ip": "172.16.62.212", "mac": "a4:ae:12:79:c9:81" }, { "ip": "172.16.62.213", "mac": "a4:ae:12:79:5a:27" }]
+     let ser_port = get_service_port_map()
+     prepare_test_L2_basic(ip_mac, ser_port)
 //     prepare_test_L3_AttachRouter_then_CreatePorts(ip_mac, ser_port)
 //     prepare_test_L3_CreatePorts_then_AttachRouter(ip_mac, ser_port)
-// }
+}
 

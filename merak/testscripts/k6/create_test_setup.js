@@ -185,6 +185,16 @@ export function get_ports(port) {
     console.log(JSON.stringify(res));
 }
 
+export function get_security_group(port) {
+    let projectid = get_alcor_services_info("test_setup", "project_id")
+    let url = `http://localhost:${port}/project/${projectid}/security-groups`
+    console.log("url: " + url)
+
+    let res = get_httprequest(url)
+    console.log(JSON.stringify(res));
+}
+
+
 export function create_ports(port) {
     console.log("Creating Goal State Ports");
     let projectid = get_alcor_services_info("test_setup", "project_id")
@@ -268,9 +278,9 @@ export function create_test_setup(ip_mac) {
     return ip_mac_db
 }
 
-
 // simple test
 export default function() {
+<<<<<<< HEAD
     // let ip_mac = [{ "ip": "172.16.62.212", "mac": "a4:ae:12:79:c9:81" }, { "ip": "172.16.62.213", "mac": "a4:ae:12:79:5a:27" }]
     // create_test_setup(ip_mac)
     let service_port_map = get_service_port_map()
@@ -279,3 +289,8 @@ export default function() {
     get_vpcs(service_port_map["vpm"])
     get_ports(service_port_map["pm"])
 }
+=======
+   let ip_mac = [{ "ip": "172.16.62.212", "mac": "a4:ae:12:79:c9:81" }, { "ip": "172.16.62.213", "mac": "a4:ae:12:79:5a:27" }]
+   let res = create_test_setup(ip_mac)
+}
+>>>>>>> recent codes about k6

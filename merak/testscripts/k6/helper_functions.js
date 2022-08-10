@@ -30,6 +30,18 @@ export function uuid() {
     return uuid
 }
 
+function genMAC(){
+    var hexDigits = '0123456789abcdef';
+    var macAddress = "";
+    console.log("in")
+    for (var i = 0; i < 6; i++) {
+        macAddress+=hexDigits.charAt(Math.round(Math.random() * 15));
+        macAddress+=hexDigits.charAt(Math.round(Math.random() * 15));
+        if (i != 5) macAddress += ":";
+    }
+    return macAddress;
+}
+
 // Verify the regularity of IP
 var ip_reg = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
@@ -270,13 +282,16 @@ export default function() {
 
     // res = get_cidr_network_address_range("10.0.0.0/8")
 
-    let A = { "B": 1234, "c": [1, 2, 3, 4], "D": { "E": true } }
-    let F = cloneObj(A)
-    console.log(JSON.stringify(A))
-    console.log(JSON.stringify(F))
-    A["B"] = 88888
-    console.log(JSON.stringify(A))
-    console.log(JSON.stringify(F))
+    // let A = { "B": 1234, "c": [1, 2, 3, 4], "D": { "E": true } }
+    // let F = cloneObj(A)
+    // console.log(JSON.stringify(A))
+    // console.log(JSON.stringify(F))
+    // A["B"] = 88888
+    // console.log(JSON.stringify(A))
+    // console.log(JSON.stringify(F))
+
+    res = genMAC()
+    console.log(res)
 
 
 }

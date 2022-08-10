@@ -60,8 +60,8 @@ alcor_services["services"]["gateway_manager"] = { "name": "gm", "port": 9009 }
 
 // [AlcorControlAgents]
 alcor_services["AlcorControlAgents"] = {}
-alcor_services["AlcorControlAgents"]["node1"] = "172.31.19.133"
-alcor_services["AlcorControlAgents"]["node2"] = "172.31.21.202"
+alcor_services["AlcorControlAgents"]["node1"] = "172.16.62.212"
+alcor_services["AlcorControlAgents"]["node2"] = "172.16.62.213"
 
 // [test_setup]
 alcor_services["test_setup"] = {}
