@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aca-deployment
+spec:
+  selector:
+    matchLabels:
+      app: aca
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: aca
+    spec:
+    # hostPID: true
+      containers:
+      - name: aca
+        image: aca_image
+        command: ["/bin/sh","-c"]
+        args: ["service rsyslog restart && /etc/init.d/openvswitch-switch restart && /root/alcor-control-agent/build/bin/AlcorControlAgent -d -a 10.213.43.251 -p 30014"]
+        securityContext:
+            privileged: true
+        ports:
+        - containerPort: 50001
